@@ -48,7 +48,7 @@ def analyze(deck) -> AnalysisSection:
             f"{len(present)} known combo(s) already in the deck",
         )
         for m in present:
-            section.add("info", f"• {' + '.join(m.cards)} → {_produces_str(m)}")
+            section.add("info", f"{' + '.join(m.cards)} → {_produces_str(m)}")
     else:
         section.add("info", "no complete combos in the deck as built")
 
@@ -62,7 +62,7 @@ def analyze(deck) -> AnalysisSection:
             missing = m.missing[0] if m.missing else "?"
             section.add(
                 "info",
-                f"• add [bold]{missing}[/bold] → {' + '.join(m.cards)} "
+                f"add [bold]{missing}[/bold] → {' + '.join(m.cards)} "
                 f"({_produces_str(m)})",
             )
         if len(near) > _MAX_NEAR:

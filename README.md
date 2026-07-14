@@ -17,9 +17,11 @@ Deck Weaver's goal is to be a **master of MTG rules and play mechanics** that ca
 a local SQLite knowledge base, answers card and rules lookups, tags every card
 with its strategic roles (ramp, draw, removal, wincon, ...) scored by quality —
 validated against a hand-labeled 348-card golden corpus at 100% recall with zero
-false-positive violations — and **analyzes whole decklists**: legality, bracket
-floor, mana base (land count, color sources vs. pips, curve), and role coverage
-against deckbuilding benchmarks.
+false-positive violations — and **analyzes whole decklists** across six angles:
+legality & bracket floor, mana base (land count, color sources vs. pips, curve),
+role coverage vs. deckbuilding benchmarks, consistency (hypergeometric opening-hand
+and land-drop odds), combo detection (win lines present + one card away), and a
+defense-style & weakness report.
 
 ### Quickstart
 
