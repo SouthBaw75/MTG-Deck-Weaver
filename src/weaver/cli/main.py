@@ -210,6 +210,25 @@ def tags(ctx: click.Context, tag_name: str | None, top_n: int):
 
 
 @cli.command()
+@click.argument("decklist", type=click.Path(exists=True, dir_okay=False))
+@click.pass_context
+def analyze(ctx: click.Context, decklist: str):
+    """Analyze a decklist (plain-text `1 Card Name` format)."""
+    from weaver.analysis.engine import analyze_deck
+    from weaver.analysis.loader import load_deck
+    from weaver.analysis.report import render_report
+
+    conn = _open_db(ctx.obj["db_path"])
+    if conn.execute("SELECT COUNT(*) FROM cards").fetchone()[0] == 0:
+        console.print("[red]Knowledge base is empty.[/red] Run `weaver update` first.")
+        raise SystemExit(1)
+    with open(decklist, encoding="utf-8") as fh:
+        deck = load_deck(conn, fh.read())
+    sections = analyze_deck(deck)
+    render_report(console, deck, sections)
+
+
+@cli.command()
 @click.pass_context
 def stats(ctx: click.Context):
     """Show knowledge base row counts and data freshness."""
