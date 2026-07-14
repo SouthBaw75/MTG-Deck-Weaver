@@ -11,7 +11,25 @@ Deck Weaver's goal is to be a **master of MTG rules and play mechanics** that ca
 
 ## Project Status
 
-**Planning phase.** See the planning documents:
+**Phase 0 (data foundation) is built.** The `weaver` CLI downloads all public data
+sources into a local SQLite knowledge base and answers card and rules lookups.
+
+### Quickstart
+
+```bash
+pip install -e ".[dev]"      # install the weaver CLI (Python 3.11+)
+weaver update                # download + build the knowledge base (needs internet)
+weaver card "Rhystic Study"  # card lookup: oracle text, legality, Game Changer flag
+weaver rule 702.2            # Comprehensive Rules lookup (or full-text: weaver rule deathtouch)
+weaver stats                 # knowledge base row counts and freshness
+pytest                       # offline test suite (50 tests, no network needed)
+```
+
+`weaver update` fetches from api.scryfall.com, mtgjson.com, media.wizards.com /
+magic.wizards.com, and backend.commanderspellbook.com — allow those hosts if you
+run it in a restricted environment. Everything else works offline.
+
+### Planning documents
 
 | Document | Purpose |
 |---|---|
