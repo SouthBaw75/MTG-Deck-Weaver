@@ -13,12 +13,13 @@ Deck Weaver's goal is to be a **master of MTG rules and play mechanics** that ca
 
 ## Project Status
 
-**Phase 0 (data foundation) and Phase 1 (card understanding) are built.** The
-`weaver` CLI downloads all public data sources into a local SQLite knowledge base,
-answers card and rules lookups, and tags every card with its strategic roles
-(ramp, draw, removal, wincon, ...) scored by quality — validated against a
-hand-labeled 348-card golden corpus at 100% recall with zero false-positive
-violations.
+**Phases 0–2 are built.** The `weaver` CLI downloads all public data sources into
+a local SQLite knowledge base, answers card and rules lookups, tags every card
+with its strategic roles (ramp, draw, removal, wincon, ...) scored by quality —
+validated against a hand-labeled 348-card golden corpus at 100% recall with zero
+false-positive violations — and **analyzes whole decklists**: legality, bracket
+floor, mana base (land count, color sources vs. pips, curve), and role coverage
+against deckbuilding benchmarks.
 
 ### Quickstart
 
@@ -29,6 +30,7 @@ weaver card "Rhystic Study"  # card lookup: oracle text, legality, roles, Game C
 weaver rule 702.2            # Comprehensive Rules lookup (or full-text: weaver rule deathtouch)
 weaver tag                   # (re)run the role-tagging engine over all cards
 weaver tags ramp.rock        # best cards for a role; `weaver tags` lists the taxonomy
+weaver analyze mydeck.txt    # full deck report: legality, bracket, mana base, role coverage
 weaver stats                 # knowledge base row counts and freshness
 pytest                       # offline test suite (500+ tests, no network needed)
 ```
