@@ -1,0 +1,26 @@
+{
+  "source": "Commander deckbuilding conventions (ramp/draw/removal/wipe templates)",
+  "notes": "Target COUNTS for key functional roles in a well-rounded ~100-card Commander deck. Each role group maps to a set of taxonomy tags; a card counts once per group even if it carries several tags in that group. 'min' is the floor below which a deck feels deficient; 'ideal' is the well-rounded target. Values reflect the common '~12 ramp / ~10 draw / ~10 interaction / a couple of wipes' rule of thumb.",
+  "role_groups": {
+    "ramp": {"tags": ["ramp.rock", "ramp.land", "ramp.dork", "ramp.ritual"], "min": 10, "ideal": 12},
+    "card_advantage": {"tags": ["draw.burst", "draw.engine", "impulse-draw", "wheel"], "min": 8, "ideal": 12},
+    "spot_removal": {"tags": ["removal.spot.creature", "removal.spot.any", "removal.spot.artifact-enchantment"], "min": 6, "ideal": 10},
+    "board_wipe": {"tags": ["wipe.creature", "wipe.any", "wipe.artifact-enchantment"], "min": 2, "ideal": 4},
+    "targeted_disruption": {"tags": ["counterspell", "graveyard-hate"], "min": 0, "ideal": 3},
+    "protection": {"tags": ["protection.self", "protection.board"], "min": 1, "ideal": 3},
+    "wincon": {"tags": ["wincon.combat", "wincon.alt", "extra-combat", "buff.anthem"], "min": 1, "ideal": 3}
+  },
+  "bracket_modifiers": {
+    "4": {
+      "card_advantage": {"min": 10, "ideal": 14},
+      "spot_removal": {"min": 8, "ideal": 12},
+      "targeted_disruption": {"min": 2, "ideal": 5}
+    },
+    "5": {
+      "ramp": {"min": 12, "ideal": 15},
+      "card_advantage": {"min": 10, "ideal": 14},
+      "spot_removal": {"min": 8, "ideal": 12},
+      "targeted_disruption": {"min": 3, "ideal": 6}
+    }
+  }
+}
