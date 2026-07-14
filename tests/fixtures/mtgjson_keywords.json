@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "date": "2026-07-13",
+    "version": "5.2.2+20260713"
+  },
+  "data": {
+    "abilityWords": [
+      "Adamant",
+      "Addendum",
+      "Battalion",
+      "Bloodrush",
+      "Constellation",
+      "Converge",
+      "Coven",
+      "Delirium",
+      "Domain",
+      "Enrage",
+      "Ferocious",
+      "Hellbent",
+      "Heroic",
+      "Metalcraft",
+      "Morbid",
+      "Raid",
+      "Revolt",
+      "Threshold"
+    ],
+    "keywordAbilities": [
+      "Deathtouch",
+      "Defender",
+      "Double strike",
+      "First strike",
+      "Flash",
+      "Flying",
+      "Haste",
+      "Hexproof",
+      "Indestructible",
+      "Landfall",
+      "Lifelink",
+      "Menace",
+      "Reach",
+      "Trample",
+      "Vigilance",
+      "Ward"
+    ],
+    "keywordActions": [
+      "Attach",
+      "Cast",
+      "Counter",
+      "Create",
+      "Destroy",
+      "Discard",
+      "Exchange",
+      "Exile",
+      "Fight",
+      "Mill",
+      "Play",
+      "Sacrifice",
+      "Scry",
+      "Search",
+      "Shuffle",
+      "Tap",
+      "Untap"
+    ]
+  }
+}

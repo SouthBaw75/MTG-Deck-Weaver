@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "date": "2026-07-13",
+    "version": "5.2.2+20260713"
+  },
+  "data": {
+    "artifact": {
+      "subTypes": [
+        "Attraction",
+        "Blood",
+        "Clue",
+        "Contraption",
+        "Equipment",
+        "Food",
+        "Fortification",
+        "Gold",
+        "Incubator",
+        "Map",
+        "Powerstone",
+        "Treasure",
+        "Vehicle"
+      ],
+      "superTypes": [
+        "Legendary",
+        "Snow",
+        "World"
+      ]
+    },
+    "battle": {
+      "subTypes": [
+        "Siege"
+      ],
+      "superTypes": [
+        "Legendary"
+      ]
+    },
+    "creature": {
+      "subTypes": [
+        "Advisor",
+        "Angel",
+        "Beast",
+        "Bird",
+        "Cleric",
+        "Dragon",
+        "Druid",
+        "Elemental",
+        "Elf",
+        "Goblin",
+        "Human",
+        "Knight",
+        "Merfolk",
+        "Soldier",
+        "Vampire",
+        "Warrior",
+        "Wizard",
+        "Zombie"
+      ],
+      "superTypes": [
+        "Host",
+        "Legendary",
+        "Snow"
+      ]
+    },
+    "enchantment": {
+      "subTypes": [
+        "Aura",
+        "Background",
+        "Cartouche",
+        "Case",
+        "Class",
+        "Curse",
+        "Role",
+        "Rune",
+        "Saga",
+        "Shrine"
+      ],
+      "superTypes": [
+        "Legendary",
+        "Snow",
+        "World"
+      ]
+    },
+    "instant": {
+      "subTypes": [
+        "Adventure",
+        "Arcane",
+        "Lesson",
+        "Trap"
+      ],
+      "superTypes": []
+    },
+    "land": {
+      "subTypes": [
+        "Cave",
+        "Desert",
+        "Forest",
+        "Gate",
+        "Island",
+        "Lair",
+        "Locus",
+        "Mine",
+        "Mountain",
+        "Plains",
+        "Power-Plant",
+        "Sphere",
+        "Swamp",
+        "Tower",
+        "Urza's"
+      ],
+      "superTypes": [
+        "Basic",
+        "Legendary",
+        "Snow"
+      ]
+    },
+    "planeswalker": {
+      "subTypes": [
+        "Ajani",
+        "Chandra",
+        "Elspeth",
+        "Garruk",
+        "Jace",
+        "Liliana",
+        "Nissa",
+        "Sorin",
+        "Teferi"
+      ],
+      "superTypes": [
+        "Legendary"
+      ]
+    },
+    "sorcery": {
+      "subTypes": [
+        "Adventure",
+        "Arcane",
+        "Lesson"
+      ],
+      "superTypes": [
+        "Legendary"
+      ]
+    }
+  }
+}
