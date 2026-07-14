@@ -1,0 +1,804 @@
+# Golden cards for the "engine" domain matcher (engine parts + utility).
+# expect / forbid only use the fifteen engine-domain tags.
+cards:
+  # ---- token-producer -----------------------------------------------------
+  - name: Bitterblossom
+    mana_cost: "{1}{B}"
+    mana_value: 1
+    type_line: Tribal Enchantment — Faerie
+    oracle_text: |
+      At the beginning of your upkeep, you lose 1 life and create a 1/1 black Faerie Rogue creature token with flying.
+    expect: [token-producer]
+
+  - name: Krenko, Mob Boss
+    mana_cost: "{2}{R}{R}"
+    mana_value: 4
+    type_line: Legendary Creature — Goblin Warrior
+    power: 3
+    toughness: 3
+    oracle_text: |
+      {T}: Create X 1/1 red Goblin creature tokens, where X is the number of Goblins you control.
+    expect: [token-producer]
+
+  - name: Assemble the Legion
+    mana_cost: "{3}{R}{W}"
+    mana_value: 5
+    type_line: Enchantment
+    oracle_text: |
+      At the beginning of your upkeep, put a muster counter on ~. Then create a 1/1 red and white Soldier creature token with haste for each muster counter on ~.
+    expect: [token-producer]
+    forbid: [counters-matter]
+
+  - name: Secure the Wastes
+    mana_cost: "{X}{W}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Create X 1/1 white Warrior creature tokens.
+    expect: [token-producer]
+
+  # ---- treasure-producer ---------------------------------------------------
+  - name: Dockside Extortionist
+    mana_cost: "{1}{R}"
+    mana_value: 2
+    type_line: Creature — Goblin Pirate
+    power: 1
+    toughness: 2
+    oracle_text: |
+      When ~ enters the battlefield, create X Treasure tokens, where X is the number of artifacts and enchantments your opponents control.
+    expect: [treasure-producer]
+
+  - name: Smothering Tithe
+    mana_cost: "{3}{W}"
+    mana_value: 4
+    type_line: Enchantment
+    oracle_text: |
+      Whenever an opponent draws a card, that player may pay {2}. If the player doesn't, you create a Treasure token.
+    expect: [treasure-producer]
+
+  - name: Pitiless Plunderer
+    mana_cost: "{3}{B}"
+    mana_value: 4
+    type_line: Creature — Human Pirate
+    power: 1
+    toughness: 4
+    oracle_text: |
+      Whenever another creature you control dies, create a Treasure token.
+    expect: [treasure-producer, death-payoff]
+
+  - name: Brass's Bounty
+    mana_cost: "{6}{R}"
+    mana_value: 7
+    type_line: Sorcery
+    oracle_text: |
+      For each land you control, create a Treasure token.
+    expect: [treasure-producer]
+
+  - name: Storm-Kiln Artist
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: Creature — Dwarf Shaman
+    power: 2
+    toughness: 2
+    oracle_text: |
+      Magecraft — Whenever you cast or copy an instant or sorcery spell, create a Treasure token.
+    expect: [treasure-producer, spellslinger-payoff]
+
+  # ---- sac-outlet ------------------------------------------------------------
+  - name: Ashnod's Altar
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: Artifact
+    oracle_text: |
+      Sacrifice a creature: Add {C}{C}.
+    expect: [sac-outlet]
+
+  - name: Phyrexian Altar
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: Artifact
+    oracle_text: |
+      Sacrifice a creature: Add one mana of any color.
+    expect: [sac-outlet]
+
+  - name: Viscera Seer
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Creature — Vampire Wizard
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Sacrifice a creature: Scry 1.
+    expect: [sac-outlet]
+
+  - name: Goblin Bombardment
+    mana_cost: "{1}{R}"
+    mana_value: 2
+    type_line: Enchantment
+    oracle_text: |
+      Sacrifice a creature: ~ deals 1 damage to any target.
+    expect: [sac-outlet]
+
+  - name: Birthing Pod
+    mana_cost: "{3}{G/P}"
+    mana_value: 4
+    type_line: Artifact
+    oracle_text: |
+      {1}{G/P}, {T}, Sacrifice a creature: Search your library for a creature card with mana value equal to 1 plus the sacrificed creature's mana value, put that card onto the battlefield, then shuffle. Activate only as a sorcery.
+    expect: [sac-outlet]
+
+  # ---- death-payoff -----------------------------------------------------------
+  - name: Blood Artist
+    mana_cost: "{1}{B}"
+    mana_value: 2
+    type_line: Creature — Vampire
+    power: 0
+    toughness: 1
+    oracle_text: |
+      Whenever ~ or another creature dies, target player loses 1 life and you gain 1 life.
+    expect: [death-payoff]
+
+  - name: Zulaport Cutthroat
+    mana_cost: "{1}{B}"
+    mana_value: 2
+    type_line: Creature — Human Rogue Ally
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Whenever ~ or another creature you control dies, each opponent loses 1 life and you gain 1 life.
+    expect: [death-payoff]
+
+  - name: Grave Pact
+    mana_cost: "{B}{B}{B}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Whenever a creature you control dies, each other player sacrifices a creature.
+    expect: [death-payoff]
+    forbid: [sac-outlet]
+
+  - name: Midnight Reaper
+    mana_cost: "{2}{B}"
+    mana_value: 3
+    type_line: Creature — Zombie Knight
+    power: 3
+    toughness: 2
+    oracle_text: |
+      Whenever a nontoken creature you control dies, ~ deals 1 damage to you and you draw a card.
+    expect: [death-payoff]
+
+  # ---- counters-matter ---------------------------------------------------------
+  - name: Doubling Season
+    mana_cost: "{4}{G}"
+    mana_value: 5
+    type_line: Enchantment
+    oracle_text: |
+      If an effect would create one or more tokens under your control, it creates twice that many of those tokens instead.
+      If an effect would put one or more counters on a permanent you control, it puts twice that many of those counters on that permanent instead.
+    expect: [counters-matter]
+
+  - name: Hardened Scales
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Enchantment
+    oracle_text: |
+      If one or more +1/+1 counters would be put on a creature you control, that many plus one +1/+1 counters are put on it instead.
+    expect: [counters-matter]
+
+  - name: Branching Evolution
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      If one or more +1/+1 counters would be put on a creature you control, twice that many +1/+1 counters are put on that creature instead.
+    expect: [counters-matter]
+
+  - name: Cathars' Crusade
+    mana_cost: "{3}{W}{W}"
+    mana_value: 5
+    type_line: Enchantment
+    oracle_text: |
+      Whenever a creature you control enters, put a +1/+1 counter on each creature you control.
+    expect: [counters-matter]
+    forbid: [landfall-payoff]
+
+  - name: The Ozolith
+    mana_cost: "{1}"
+    mana_value: 1
+    type_line: Legendary Artifact
+    oracle_text: |
+      Whenever a creature you control leaves the battlefield, if it had counters on it, put those counters on ~.
+      At the beginning of combat on your turn, if ~ has counters on it, you may move all counters from ~ onto target creature.
+    expect: [counters-matter]
+
+  - name: Evolution Sage
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Creature — Elf Druid
+    power: 3
+    toughness: 2
+    oracle_text: |
+      Whenever a land you control enters, proliferate.
+    expect: [counters-matter, landfall-payoff]
+
+  # ---- landfall-payoff ------------------------------------------------------------
+  - name: Lotus Cobra
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Snake
+    power: 2
+    toughness: 1
+    oracle_text: |
+      Landfall — Whenever a land you control enters, add one mana of any color.
+    expect: [landfall-payoff]
+
+  - name: Avenger of Zendikar
+    mana_cost: "{5}{G}{G}"
+    mana_value: 7
+    type_line: Creature — Elemental
+    power: 5
+    toughness: 5
+    oracle_text: |
+      When ~ enters, create a 0/1 green Plant creature token for each land you control.
+      Landfall — Whenever a land you control enters, you may put a +1/+1 counter on each Plant creature you control.
+    expect: [landfall-payoff, token-producer]
+
+  - name: Scute Swarm
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Creature — Insect
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Landfall — Whenever a land you control enters, create a 1/1 green Insect creature token. If you control six or more lands, create a token that's a copy of ~ instead.
+    expect: [landfall-payoff, token-producer]
+
+  - name: Tatyova, Benthic Druid
+    mana_cost: "{3}{G}{U}"
+    mana_value: 5
+    type_line: Legendary Creature — Merfolk Druid
+    power: 3
+    toughness: 3
+    oracle_text: |
+      Whenever a land you control enters, you gain 1 life and draw a card.
+    expect: [landfall-payoff]
+
+  # ---- spellslinger-payoff -----------------------------------------------------------
+  - name: Talrand, Sky Summoner
+    mana_cost: "{2}{U}{U}"
+    mana_value: 4
+    type_line: Legendary Creature — Merfolk Wizard
+    power: 2
+    toughness: 2
+    oracle_text: |
+      Whenever you cast an instant or sorcery spell, create a 2/2 blue Drake creature token with flying.
+    expect: [spellslinger-payoff, token-producer]
+
+  - name: Young Pyromancer
+    mana_cost: "{1}{R}"
+    mana_value: 2
+    type_line: Creature — Human Shaman
+    power: 2
+    toughness: 1
+    oracle_text: |
+      Whenever you cast an instant or sorcery spell, create a 1/1 red Elemental creature token.
+    expect: [spellslinger-payoff, token-producer]
+
+  - name: Guttersnipe
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: Creature — Goblin Shaman
+    power: 2
+    toughness: 2
+    oracle_text: |
+      Whenever you cast an instant or sorcery spell, ~ deals 2 damage to each opponent.
+    expect: [spellslinger-payoff]
+
+  - name: Archmage Emeritus
+    mana_cost: "{2}{U}{U}"
+    mana_value: 4
+    type_line: Creature — Human Wizard
+    power: 2
+    toughness: 2
+    oracle_text: |
+      Magecraft — Whenever you cast or copy an instant or sorcery spell, draw a card.
+    expect: [spellslinger-payoff]
+
+  - name: Grapeshot
+    mana_cost: "{1}{R}"
+    mana_value: 2
+    type_line: Sorcery
+    keywords: [Storm]
+    oracle_text: |
+      ~ deals 1 damage to any target.
+      Storm
+    expect: [spellslinger-payoff]
+
+  - name: Monastery Swiftspear
+    mana_cost: "{R}"
+    mana_value: 1
+    type_line: Creature — Human Monk
+    power: 1
+    toughness: 2
+    keywords: [Haste, Prowess]
+    oracle_text: |
+      Haste
+      Prowess
+    expect: [spellslinger-payoff]
+    forbid: [haste-granting]
+
+  # ---- untapper --------------------------------------------------------------------
+  - name: Seedborn Muse
+    mana_cost: "{3}{G}{G}"
+    mana_value: 5
+    type_line: Creature — Spirit
+    power: 2
+    toughness: 4
+    oracle_text: |
+      Untap all permanents you control during each other player's untap step.
+    expect: [untapper]
+
+  - name: Kiora's Follower
+    mana_cost: "{G}{U}"
+    mana_value: 2
+    type_line: Creature — Merfolk
+    power: 2
+    toughness: 2
+    oracle_text: |
+      {T}: Untap another target permanent.
+    expect: [untapper]
+
+  - name: Unwinding Clock
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Artifact
+    oracle_text: |
+      Untap all artifacts you control during each other player's untap step.
+    expect: [untapper]
+
+  - name: Intruder Alarm
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Creatures don't untap during their controllers' untap steps.
+      Whenever a creature enters, untap all creatures.
+    expect: [untapper]
+    forbid: [landfall-payoff]
+
+  # ---- copy-effect -----------------------------------------------------------------
+  - name: Fork
+    mana_cost: "{R}{R}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Copy target instant or sorcery spell, except that the copy is red. You may choose new targets for the copy.
+    expect: [copy-effect]
+
+  - name: Twincast
+    mana_cost: "{U}{U}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Copy target instant or sorcery spell. You may choose new targets for the copy.
+    expect: [copy-effect]
+
+  - name: Narset's Reversal
+    mana_cost: "{U}{U}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Copy target instant or sorcery spell, then return it to its owner's hand. You may choose new targets for the copy.
+    expect: [copy-effect]
+    forbid: [blink]
+
+  - name: Helm of the Host
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Legendary Artifact — Equipment
+    oracle_text: |
+      At the beginning of combat on your turn, create a token that's a copy of equipped creature, except the token isn't legendary if equipped creature is legendary. That token gains haste.
+      Equip {5}
+    expect: [copy-effect]
+
+  # ---- blink -----------------------------------------------------------------------
+  - name: Ephemerate
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: Instant
+    keywords: [Rebound]
+    oracle_text: |
+      Exile target creature you control, then return it to the battlefield under its owner's control.
+      Rebound
+    expect: [blink]
+
+  - name: Restoration Angel
+    mana_cost: "{3}{W}"
+    mana_value: 4
+    type_line: Creature — Angel
+    power: 3
+    toughness: 4
+    keywords: [Flash, Flying]
+    oracle_text: |
+      Flash
+      Flying
+      When ~ enters, you may exile target non-Angel creature you control, then return that card to the battlefield under your control.
+    expect: [blink]
+    forbid: [flash-granting]
+
+  - name: Thassa, Deep-Dwelling
+    mana_cost: "{3}{U}"
+    mana_value: 4
+    type_line: Legendary Enchantment Creature — God
+    power: 6
+    toughness: 5
+    keywords: [Indestructible]
+    oracle_text: |
+      Indestructible
+      As long as your devotion to blue is less than five, ~ isn't a creature.
+      At the beginning of your end step, exile up to one other target creature you control, then return it to the battlefield under its owner's control.
+      {3}{U}: Tap target creature.
+    expect: [blink]
+
+  - name: Conjurer's Closet
+    mana_cost: "{5}"
+    mana_value: 5
+    type_line: Artifact
+    oracle_text: |
+      At the beginning of your end step, you may exile target creature you control, then return it to the battlefield under your control.
+    expect: [blink]
+
+  # ---- cheat-into-play --------------------------------------------------------------
+  - name: Sneak Attack
+    mana_cost: "{3}{R}"
+    mana_value: 4
+    type_line: Enchantment
+    oracle_text: |
+      {R}: You may put a creature card from your hand onto the battlefield. That creature gains haste. Sacrifice the creature at the beginning of the next end step.
+    expect: [cheat-into-play]
+    forbid: [sac-outlet]
+
+  - name: Elvish Piper
+    mana_cost: "{3}{G}"
+    mana_value: 4
+    type_line: Creature — Elf Shaman
+    power: 1
+    toughness: 1
+    oracle_text: |
+      {G}, {T}: You may put a creature card from your hand onto the battlefield.
+    expect: [cheat-into-play]
+
+  - name: Show and Tell
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: |
+      Each player may put an artifact, creature, enchantment, or land card from their hand onto the battlefield.
+    expect: [cheat-into-play]
+
+  - name: Reanimate
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Sorcery
+    oracle_text: |
+      Put target creature card from a graveyard onto the battlefield under your control. You lose life equal to its mana value.
+    expect: [cheat-into-play]
+
+  - name: Natural Order
+    mana_cost: "{2}{G}{G}"
+    mana_value: 4
+    type_line: Sorcery
+    oracle_text: |
+      As an additional cost to cast this spell, sacrifice a green creature.
+      Search your library for a green creature card, put it onto the battlefield, then shuffle.
+    expect: [cheat-into-play]
+    forbid: [sac-outlet]
+
+  # ---- graveyard-fill ----------------------------------------------------------------
+  - name: Faithless Looting
+    mana_cost: "{R}"
+    mana_value: 1
+    type_line: Sorcery
+    keywords: [Flashback]
+    oracle_text: |
+      Draw two cards, then discard two cards.
+      Flashback {2}{R}
+    expect: [graveyard-fill]
+
+  - name: Frantic Search
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      Draw two cards, then discard two cards. Untap up to three lands.
+    expect: [graveyard-fill]
+
+  - name: Entomb
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Search your library for a card, put it into your graveyard, then shuffle.
+    expect: [graveyard-fill]
+    forbid: [cheat-into-play]
+
+  - name: Stitcher's Supplier
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Creature — Zombie
+    power: 1
+    toughness: 1
+    oracle_text: |
+      When ~ enters the battlefield or dies, mill three cards.
+    expect: [graveyard-fill]
+    forbid: [death-payoff]
+
+  - name: Hermit Druid
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Human Druid
+    power: 1
+    toughness: 1
+    oracle_text: |
+      {G}, {T}: Reveal cards from the top of your library until you reveal a basic land card. Put that card into your hand and all other cards revealed this way into your graveyard.
+    expect: [graveyard-fill]
+
+  # ---- discard-payoff ----------------------------------------------------------------
+  - name: Waste Not
+    mana_cost: "{1}{B}"
+    mana_value: 2
+    type_line: Enchantment
+    oracle_text: |
+      Whenever an opponent discards a creature card, create a 2/2 black Zombie creature token.
+      Whenever an opponent discards a land card, add {B}.
+      Whenever an opponent discards a noncreature, nonland card, draw a card.
+    expect: [discard-payoff]
+
+  - name: Bone Miser
+    mana_cost: "{3}{B}{B}"
+    mana_value: 5
+    type_line: Creature — Zombie Wizard
+    power: 2
+    toughness: 4
+    oracle_text: |
+      Whenever you discard a creature card, create a 2/2 black Zombie creature token.
+      Whenever you discard a land card, add {B}{B}.
+      Whenever you discard a noncreature, nonland card, draw a card.
+    expect: [discard-payoff]
+
+  - name: Archfiend of Ifnir
+    mana_cost: "{3}{B}{B}"
+    mana_value: 5
+    type_line: Creature — Demon
+    power: 5
+    toughness: 4
+    keywords: [Flying, Cycling]
+    oracle_text: |
+      Flying
+      Whenever you cycle or discard another card, put a -1/-1 counter on each creature your opponents control.
+      Cycling {2}
+    expect: [discard-payoff]
+    forbid: [counters-matter]
+
+  - name: Containment Construct
+    mana_cost: "{1}"
+    mana_value: 1
+    type_line: Artifact Creature — Construct
+    power: 1
+    toughness: 2
+    oracle_text: |
+      Whenever you discard a card, exile it instead of putting it into your graveyard, and you may play that card this turn.
+    expect: [discard-payoff]
+    forbid: [graveyard-fill]
+
+  # ---- haste-granting ------------------------------------------------------------------
+  - name: Fervor
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Creatures you control have haste.
+    expect: [haste-granting]
+
+  - name: Rhythm of the Wild
+    mana_cost: "{1}{R}{G}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Creature spells you control can't be countered.
+      Nonhuman creatures you control have riot.
+    expect: [haste-granting]
+
+  - name: Anger
+    mana_cost: "{3}{R}"
+    mana_value: 4
+    type_line: Creature — Incarnation
+    power: 2
+    toughness: 2
+    keywords: [Haste]
+    oracle_text: |
+      Haste
+      As long as ~ is in your graveyard and you control a Mountain, creatures you control have haste.
+    expect: [haste-granting]
+
+  - name: Hammer of Purphoros
+    mana_cost: "{1}{R}{R}"
+    mana_value: 3
+    type_line: Legendary Enchantment Artifact
+    oracle_text: |
+      Creatures you control have haste.
+      {2}{R}, Sacrifice a land: Create a 3/3 colorless Golem enchantment artifact creature token.
+    expect: [haste-granting, token-producer]
+    forbid: [sac-outlet]
+
+  # ---- flash-granting -------------------------------------------------------------------
+  - name: Vedalken Orrery
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Artifact
+    oracle_text: |
+      You may cast spells as though they had flash.
+    expect: [flash-granting]
+
+  - name: Teferi, Mage of Zhalfir
+    mana_cost: "{2}{U}{U}{U}"
+    mana_value: 5
+    type_line: Legendary Creature — Human Wizard
+    power: 3
+    toughness: 4
+    keywords: [Flash]
+    oracle_text: |
+      Flash
+      Creature cards in your hand have flash.
+      Each opponent can cast spells only any time they could cast a sorcery.
+    expect: [flash-granting]
+
+  - name: Emergence Zone
+    type_line: Land
+    mana_value: 0
+    oracle_text: |
+      {T}: Add {C}.
+      {1}, {T}, Sacrifice ~: You may cast spells this turn as though they had flash.
+    expect: [flash-granting]
+    forbid: [sac-outlet]
+
+  # ============================ tricky negatives ============================
+  - name: Oblivion Ring
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      When ~ enters the battlefield, exile another target nonland permanent.
+      When ~ leaves the battlefield, return the exiled card to the battlefield under its owner's control.
+    forbid: [blink, cheat-into-play]
+
+  - name: Cultivate
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: |
+      Search your library for up to two basic land cards, reveal those cards, put one onto the battlefield tapped and the other into your hand, then shuffle.
+    forbid: [cheat-into-play, graveyard-fill]
+
+  - name: Maddening Cacophony
+    mana_cost: "{1}{U}"
+    mana_value: 2
+    type_line: Sorcery
+    keywords: [Kicker]
+    oracle_text: |
+      Kicker {4}
+      Each opponent mills eight cards. If this spell was kicked, instead each opponent mills half their library, rounded up.
+    forbid: [graveyard-fill]
+
+  - name: Tireless Tracker
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Creature — Human Scout
+    power: 3
+    toughness: 2
+    oracle_text: |
+      Whenever a land you control enters, investigate.
+      Whenever you sacrifice a Clue, put a +1/+1 counter on ~.
+    expect: [landfall-payoff]
+    forbid: [treasure-producer, token-producer, sac-outlet]
+
+  - name: Gilded Goose
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Creature — Bird
+    power: 0
+    toughness: 2
+    keywords: [Flying]
+    oracle_text: |
+      Flying
+      When ~ enters, create a Food token.
+      {1}{G}: Create a Food token.
+      {T}, Sacrifice a Food: Add one mana of any color.
+    forbid: [treasure-producer, token-producer, sac-outlet]
+
+  - name: Raging Goblin
+    mana_cost: "{R}"
+    mana_value: 1
+    type_line: Creature — Goblin Berserker
+    power: 1
+    toughness: 1
+    keywords: [Haste]
+    oracle_text: |
+      Haste
+    forbid: [haste-granting]
+
+  - name: Sakura-Tribe Elder
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Snake Shaman
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Sacrifice ~: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.
+    forbid: [sac-outlet, cheat-into-play]
+
+  - name: Ambush Viper
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Snake
+    power: 2
+    toughness: 1
+    keywords: [Flash, Deathtouch]
+    oracle_text: |
+      Flash
+      Deathtouch
+    forbid: [flash-granting]
+
+  - name: Snapcaster Mage
+    mana_cost: "{1}{U}"
+    mana_value: 2
+    type_line: Creature — Human Wizard
+    power: 2
+    toughness: 1
+    keywords: [Flash]
+    oracle_text: |
+      Flash
+      When ~ enters, target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost.
+    forbid: [flash-granting, spellslinger-payoff]
+
+  - name: Horseshoe Crab
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Creature — Crab
+    power: 1
+    toughness: 3
+    oracle_text: |
+      {U}: Untap ~.
+    forbid: [untapper]
+
+  - name: Solemn Simulacrum
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Artifact Creature — Golem
+    power: 2
+    toughness: 2
+    oracle_text: |
+      When ~ enters, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.
+      When ~ dies, you may draw a card.
+    forbid: [death-payoff, cheat-into-play]
+
+  - name: Triskelion
+    mana_cost: "{6}"
+    mana_value: 6
+    type_line: Artifact Creature — Construct
+    power: 1
+    toughness: 1
+    oracle_text: |
+      ~ enters the battlefield with three +1/+1 counters on it.
+      Remove a +1/+1 counter from ~: ~ deals 1 damage to any target.
+    forbid: [counters-matter, sac-outlet]
+
+  - name: Fleshbag Marauder
+    mana_cost: "{2}{B}"
+    mana_value: 3
+    type_line: Creature — Zombie Warrior
+    power: 3
+    toughness: 1
+    oracle_text: |
+      When ~ enters, each player sacrifices a creature of their choice.
+    forbid: [sac-outlet, death-payoff]

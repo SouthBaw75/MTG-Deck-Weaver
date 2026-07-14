@@ -1,0 +1,681 @@
+# Hand-labeled golden set for the interaction matcher.
+# Tags used here are ONLY the eleven interaction-domain tags.
+cards:
+  # ---------------------------------------------------------------- spot: creature
+  - name: Swords to Plowshares
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Exile target creature. Its controller gains life equal to its power.
+    expect: [removal.spot.creature]
+    forbid: [removal.spot.any, wipe.creature]
+
+  - name: Path to Exile
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Exile target creature. Its controller may search their library for a basic land card, put that card onto the battlefield tapped, then shuffle.
+    expect: [removal.spot.creature]
+    forbid: [theft, removal.spot.any]
+
+  - name: Murder
+    mana_cost: "{1}{B}{B}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      Destroy target creature.
+    expect: [removal.spot.creature]
+    forbid: [removal.spot.any]
+
+  - name: Pongify
+    mana_cost: "{U}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Destroy target creature. It can't be regenerated. That creature's controller creates a 3/3 green Ape creature token.
+    expect: [removal.spot.creature]
+    forbid: [stax]
+
+  - name: Diabolic Edict
+    mana_cost: "{1}{B}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Target player sacrifices a creature.
+    expect: [removal.spot.creature]
+    forbid: [wipe.creature, stax]
+
+  - name: Prey Upon
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Sorcery
+    oracle_text: |
+      Target creature you control fights target creature you don't control.
+    expect: [removal.spot.creature]
+    forbid: [removal.spot.any]
+
+  - name: Rabid Bite
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Sorcery
+    oracle_text: |
+      Target creature you control deals damage equal to its power to target creature you don't control.
+    expect: [removal.spot.creature]
+    forbid: [removal.spot.any]
+
+  - name: Unsummon
+    mana_cost: "{U}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Return target creature to its owner's hand.
+    expect: [removal.spot.creature]
+    forbid: [wipe.creature, theft]
+
+  - name: Deadly Rollick
+    mana_cost: "{3}{B}"
+    mana_value: 4
+    type_line: Instant
+    oracle_text: |
+      If you control a commander, you may cast this spell without paying its mana cost.
+      Exile target creature.
+    expect: [removal.spot.creature]
+    forbid: [removal.spot.any, counterspell]
+
+  # ---------------------------------------------------------------- spot: any
+  - name: Lightning Bolt
+    mana_cost: "{R}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Lightning Bolt deals 3 damage to any target.
+    expect: [removal.spot.any]
+    forbid: [wipe.creature]
+
+  - name: Chaos Warp
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      The owner of target permanent shuffles it into their library, then reveals the top card of their library. If it's a permanent card, they put it onto the battlefield.
+    expect: [removal.spot.any]
+    forbid: [counterspell]
+
+  - name: Beast Within
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      Destroy target permanent. Its controller creates a 3/3 green Beast creature token.
+    expect: [removal.spot.any]
+    forbid: [wipe.any]
+
+  - name: Generous Gift
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      Destroy target permanent. Its controller creates a 3/3 green Elephant creature token.
+    expect: [removal.spot.any]
+    forbid: [wipe.any]
+
+  - name: Anguished Unmaking
+    mana_cost: "{1}{W}{B}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      Exile target nonland permanent. You lose 3 life.
+    expect: [removal.spot.any]
+    forbid: [wipe.any]
+
+  # ---------------------------------------------------------------- spot: artifact/enchantment
+  - name: Krosan Grip
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Instant
+    keywords: [Split second]
+    oracle_text: |
+      Split second
+      Destroy target artifact or enchantment.
+    expect: [removal.spot.artifact-enchantment]
+    forbid: [removal.spot.creature, wipe.artifact-enchantment]
+
+  - name: Nature's Claim
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Destroy target artifact or enchantment. Its controller gains 4 life.
+    expect: [removal.spot.artifact-enchantment]
+    forbid: [removal.spot.creature]
+
+  - name: Abrade
+    mana_cost: "{1}{R}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Choose one —
+      • Abrade deals 3 damage to target creature.
+      • Destroy target artifact.
+    expect: [removal.spot.creature, removal.spot.artifact-enchantment]
+    forbid: [wipe.creature]
+
+  - name: Aura of Silence
+    mana_cost: "{1}{W}{W}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Artifact and enchantment spells your opponents cast cost {2} more to cast.
+      Sacrifice Aura of Silence: Destroy target artifact or enchantment.
+    expect: [taxing, removal.spot.artifact-enchantment]
+    forbid: [removal.spot.creature]
+
+  - name: Vandalblast
+    mana_cost: "{R}"
+    mana_value: 1
+    type_line: Sorcery
+    keywords: [Overload]
+    oracle_text: |
+      Destroy target artifact you don't control.
+      Overload {4}{R}
+    expect: [removal.spot.artifact-enchantment, wipe.artifact-enchantment]
+    forbid: [wipe.any, wipe.creature]
+
+  # ---------------------------------------------------------------- wipes
+  - name: Wrath of God
+    mana_cost: "{2}{W}{W}"
+    mana_value: 4
+    type_line: Sorcery
+    oracle_text: |
+      Destroy all creatures. They can't be regenerated.
+    expect: [wipe.creature]
+    forbid: [removal.spot.creature, wipe.any, stax]
+
+  - name: Blasphemous Act
+    mana_cost: "{8}{R}"
+    mana_value: 9
+    type_line: Sorcery
+    oracle_text: |
+      This spell costs {1} less to cast for each creature on the battlefield.
+      Blasphemous Act deals 13 damage to each creature.
+    expect: [wipe.creature]
+    forbid: [taxing, removal.spot.any]
+
+  - name: Toxic Deluge
+    mana_cost: "{2}{B}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: |
+      As an additional cost to cast this spell, pay X life.
+      All creatures get -X/-X until end of turn.
+    expect: [wipe.creature]
+    forbid: [removal.spot.creature, taxing]
+
+  - name: Farewell
+    mana_cost: "{4}{W}{W}"
+    mana_value: 6
+    type_line: Sorcery
+    oracle_text: |
+      Choose one or more —
+      • Exile all artifacts.
+      • Exile all creatures.
+      • Exile all enchantments.
+      • Exile all graveyards.
+    expect: [wipe.any, wipe.creature, wipe.artifact-enchantment, graveyard-hate]
+    forbid: [removal.spot.any]
+
+  - name: Austere Command
+    mana_cost: "{4}{W}{W}"
+    mana_value: 6
+    type_line: Sorcery
+    oracle_text: |
+      Choose two —
+      • Destroy all artifacts.
+      • Destroy all enchantments.
+      • Destroy all creatures with mana value 3 or less.
+      • Destroy all creatures with mana value 4 or greater.
+    expect: [wipe.any, wipe.creature, wipe.artifact-enchantment]
+    forbid: [graveyard-hate]
+
+  - name: Ruinous Ultimatum
+    mana_cost: "{R}{R}{W}{W}{W}{B}{B}"
+    mana_value: 7
+    type_line: Sorcery
+    oracle_text: |
+      Destroy all nonland permanents your opponents control.
+    expect: [wipe.any]
+    forbid: [removal.spot.any]
+
+  - name: Cyclonic Rift
+    mana_cost: "{1}{U}"
+    mana_value: 2
+    type_line: Instant
+    keywords: [Overload]
+    oracle_text: |
+      Return target nonland permanent you don't control to its owner's hand.
+      Overload {6}{U}
+    expect: [wipe.any]
+    forbid: [wipe.creature]
+
+  - name: Nevinyrral's Disk
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Artifact
+    oracle_text: |
+      Nevinyrral's Disk enters the battlefield tapped.
+      {1}, {T}: Destroy all artifacts, creatures, and enchantments.
+    expect: [wipe.any, wipe.creature, wipe.artifact-enchantment]
+    forbid: [stax]
+
+  - name: Bane of Progress
+    mana_cost: "{4}{G}{G}"
+    mana_value: 6
+    type_line: Creature — Elemental
+    power: 2
+    toughness: 2
+    oracle_text: |
+      When Bane of Progress enters the battlefield, destroy all artifacts and enchantments. Put a +1/+1 counter on Bane of Progress for each permanent destroyed this way.
+    expect: [wipe.artifact-enchantment]
+    forbid: [wipe.creature, wipe.any]
+
+  # ---------------------------------------------------------------- counterspells
+  - name: Counterspell
+    mana_cost: "{U}{U}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Counter target spell.
+    expect: [counterspell]
+    forbid: [removal.spot.any]
+
+  - name: Cancel
+    mana_cost: "{1}{U}{U}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      Counter target spell.
+    expect: [counterspell]
+
+  - name: Negate
+    mana_cost: "{1}{U}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Counter target noncreature spell.
+    expect: [counterspell]
+    forbid: [removal.spot.creature]
+
+  - name: Swan Song
+    mana_cost: "{U}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Counter target enchantment, instant, or sorcery spell. Its controller creates a 2/2 blue Bird creature token with flying.
+    expect: [counterspell]
+    forbid: [removal.spot.artifact-enchantment]
+
+  - name: Fierce Guardianship
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: |
+      If you control a commander, you may cast this spell without paying its mana cost.
+      Counter target noncreature spell.
+    expect: [counterspell]
+    forbid: [taxing]
+
+  # ---------------------------------------------------------------- graveyard hate
+  - name: Bojuka Bog
+    mana_cost: ""
+    mana_value: 0
+    type_line: Land
+    oracle_text: |
+      Bojuka Bog enters the battlefield tapped.
+      When Bojuka Bog enters the battlefield, exile target player's graveyard.
+      {T}: Add {B}.
+    expect: [graveyard-hate]
+    forbid: [stax]
+
+  - name: Rest in Peace
+    mana_cost: "{1}{W}"
+    mana_value: 2
+    type_line: Enchantment
+    oracle_text: |
+      When Rest in Peace enters the battlefield, exile all cards from all graveyards.
+      If a card or token would be put into a graveyard from anywhere, exile it instead.
+    expect: [graveyard-hate]
+    forbid: [wipe.any]
+
+  - name: Soul-Guide Lantern
+    mana_cost: "{1}"
+    mana_value: 1
+    type_line: Artifact
+    oracle_text: |
+      When Soul-Guide Lantern enters the battlefield, exile target card from a graveyard.
+      {T}, Sacrifice Soul-Guide Lantern: Exile each opponent's graveyard.
+      {1}, {T}, Sacrifice Soul-Guide Lantern: Draw a card.
+    expect: [graveyard-hate]
+    forbid: [removal.spot.any]
+
+  - name: Dauthi Voidwalker
+    mana_cost: "{B}{B}"
+    mana_value: 2
+    type_line: Creature — Dauthi Rogue
+    power: 3
+    toughness: 2
+    keywords: [Shadow]
+    oracle_text: |
+      Shadow
+      If a card would be put into an opponent's graveyard from anywhere, exile it with a void counter on it instead.
+      {T}, Sacrifice Dauthi Voidwalker: Choose an exiled card an opponent owns with a void counter on it. You may play it this turn without paying its mana cost.
+    expect: [graveyard-hate]
+    forbid: [removal.spot.creature]
+
+  - name: Ashiok, Dream Render
+    mana_cost: "{1}{U/B}{U/B}"
+    mana_value: 3
+    type_line: Legendary Planeswalker — Ashiok
+    oracle_text: |
+      Spells and abilities your opponents control can't cause their controllers to search their libraries.
+      −1: Target player mills four cards. Then exile each opponent's graveyard.
+    expect: [graveyard-hate, stax]
+    forbid: [theft]
+
+  - name: Grafdigger's Cage
+    mana_cost: "{1}"
+    mana_value: 1
+    type_line: Artifact
+    oracle_text: |
+      Creature cards in graveyards and libraries can't enter the battlefield.
+      Players can't cast spells from graveyards or libraries.
+    expect: [graveyard-hate, stax]
+    forbid: [counterspell]
+
+  # ---------------------------------------------------------------- stax
+  - name: Winter Orb
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact
+    oracle_text: |
+      Lands don't untap during their controllers' untap steps.
+    expect: [stax]
+    forbid: [taxing]
+
+  - name: Smokestack
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Artifact
+    oracle_text: |
+      At the beginning of each player's upkeep, that player may put a soot counter on Smokestack.
+      At the beginning of each player's upkeep, that player sacrifices a permanent for each soot counter on Smokestack.
+    expect: [stax]
+    forbid: [removal.spot.any, wipe.any]
+
+  - name: Drannith Magistrate
+    mana_cost: "{1}{W}"
+    mana_value: 2
+    type_line: Creature — Human Wizard
+    power: 1
+    toughness: 3
+    oracle_text: |
+      Your opponents can't cast spells from anywhere other than their hands.
+    expect: [stax]
+    forbid: [counterspell, graveyard-hate]
+
+  - name: Opposition Agent
+    mana_cost: "{2}{B}"
+    mana_value: 3
+    type_line: Creature — Human Rogue
+    power: 3
+    toughness: 2
+    keywords: [Flash]
+    oracle_text: |
+      Flash
+      You control your opponents while they're searching their libraries.
+      While an opponent is searching their library, they exile each card they find. You may play those cards for as long as they remain exiled, and you may spend mana as though it were mana of any color to cast them.
+    expect: [stax, theft]
+    forbid: [graveyard-hate]
+
+  - name: Rule of Law
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Each player can't cast more than one spell each turn.
+    expect: [stax]
+    forbid: [counterspell, taxing]
+
+  - name: Torpor Orb
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact
+    oracle_text: |
+      Creatures entering the battlefield don't cause abilities to trigger.
+    expect: [stax]
+    forbid: [wipe.creature]
+
+  - name: Aven Mindcensor
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: Creature — Bird Wizard
+    power: 2
+    toughness: 1
+    keywords: [Flash, Flying]
+    oracle_text: |
+      Flash
+      Flying
+      If an opponent would search a library, that player searches the top four cards of that library instead.
+    expect: [stax]
+    forbid: [theft]
+
+  - name: Collector Ouphe
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Ouphe
+    power: 2
+    toughness: 2
+    oracle_text: |
+      Activated abilities of artifacts can't be activated.
+    expect: [stax]
+    forbid: [removal.spot.artifact-enchantment]
+
+  - name: Blind Obedience
+    mana_cost: "{1}{W}"
+    mana_value: 2
+    type_line: Enchantment
+    keywords: [Extort]
+    oracle_text: |
+      Extort
+      Artifacts and creatures your opponents control enter the battlefield tapped.
+    expect: [stax]
+    forbid: [taxing]
+
+  # ---------------------------------------------------------------- theft
+  - name: Control Magic
+    mana_cost: "{2}{U}{U}"
+    mana_value: 4
+    type_line: Enchantment — Aura
+    oracle_text: |
+      Enchant creature
+      You control enchanted creature.
+    expect: [theft]
+    forbid: [removal.spot.creature]
+
+  - name: Agent of Treachery
+    mana_cost: "{5}{U}{U}"
+    mana_value: 7
+    type_line: Creature — Human Rogue
+    power: 2
+    toughness: 3
+    oracle_text: |
+      When Agent of Treachery enters the battlefield, gain control of target permanent.
+      At the beginning of your end step, if you control three or more permanents you don't own, draw three cards.
+    expect: [theft]
+    forbid: [removal.spot.any]
+
+  - name: Act of Treason
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: |
+      Gain control of target creature until end of turn. Untap it. It gains haste until end of turn.
+    expect: [theft]
+    forbid: [removal.spot.creature]
+
+  - name: Gonti, Lord of Luxury
+    mana_cost: "{2}{B}{B}"
+    mana_value: 4
+    type_line: Legendary Creature — Aetherborn Rogue
+    power: 2
+    toughness: 3
+    keywords: [Deathtouch]
+    oracle_text: |
+      Deathtouch
+      When Gonti, Lord of Luxury enters the battlefield, look at the top four cards of target opponent's library, exile one of them face down, then put the rest on the bottom of that library in a random order. You may cast that card for as long as it remains exiled, and you may spend mana as though it were mana of any type to cast it.
+    expect: [theft]
+    forbid: [removal.spot.creature, graveyard-hate]
+
+  # ---------------------------------------------------------------- taxing
+  - name: Sphere of Resistance
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact
+    oracle_text: |
+      Spells cost {1} more to cast.
+    expect: [taxing]
+
+  - name: Grand Arbiter Augustin IV
+    mana_cost: "{2}{W}{U}"
+    mana_value: 4
+    type_line: Legendary Creature — Human Advisor
+    power: 2
+    toughness: 3
+    oracle_text: |
+      White spells you cast cost {1} less to cast.
+      Blue spells you cast cost {1} less to cast.
+      Spells your opponents cast cost {1} more to cast.
+    expect: [taxing]
+    forbid: [counterspell]
+
+  - name: Esper Sentinel
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: Artifact Creature — Human Soldier
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Whenever an opponent casts their first noncreature spell each turn, draw a card unless that player pays {X}, where X is Esper Sentinel's power.
+    expect: [taxing]
+    forbid: [stax, counterspell]
+
+  - name: Rhystic Study
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Whenever an opponent casts a spell, you may draw a card unless that player pays {1}.
+    expect: [taxing]
+    forbid: [stax, counterspell]
+
+  # ---------------------------------------------------------------- tricky negatives
+  - name: Ghostly Prison
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Creatures can't attack you unless their controller pays {2} for each creature they control that's attacking you.
+    forbid: [stax, taxing]
+
+  - name: Sphere of Safety
+    mana_cost: "{4}{W}"
+    mana_value: 5
+    type_line: Enchantment
+    oracle_text: |
+      Creatures can't attack you or planeswalkers you control unless their controller pays {X} for each of those creatures, where X is the number of enchantments you control.
+    forbid: [stax, taxing]
+
+  - name: Giant Growth
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Target creature gets +3/+3 until end of turn.
+    forbid: [removal.spot.creature, removal.spot.any]
+
+  - name: Village Rites
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      As an additional cost to cast this spell, sacrifice a creature.
+      Draw two cards.
+    forbid: [removal.spot.creature, wipe.creature]
+
+  - name: Viscera Seer
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Creature — Vampire Wizard
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Sacrifice a creature: Scry 1.
+    forbid: [removal.spot.creature, stax]
+
+  - name: Cultivate
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: |
+      Search your library for up to two basic land cards, reveal those cards, put one onto the battlefield tapped and the other into your hand. Then shuffle.
+    forbid: [removal.spot.any, stax, taxing, theft]
+
+  - name: Grizzly Bears
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Bear
+    power: 2
+    toughness: 2
+    oracle_text: ""
+    forbid: [removal.spot.creature, stax, taxing, theft, counterspell]
+
+  - name: Grave Pact
+    mana_cost: "{1}{B}{B}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: |
+      Whenever a creature you control dies, each other player sacrifices a creature.
+    forbid: [removal.spot.creature, wipe.creature, stax]
+
+  - name: Heroic Intervention
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |
+      Permanents you control gain hexproof and indestructible until end of turn.
+    forbid: [counterspell, theft, removal.spot.any]
+
+  - name: Reanimate
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Sorcery
+    oracle_text: |
+      Put target creature card from a graveyard onto the battlefield under your control. You lose life equal to its mana value.
+    forbid: [graveyard-hate, removal.spot.creature, theft]
+
+  - name: Donate
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: |
+      Target opponent gains control of target permanent you control.
+    forbid: [theft, removal.spot.any]
+
+  - name: Veil of Summer
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: |
+      Draw a card if an opponent has cast a blue or black spell this turn. Spells you control can't be countered this turn. You and permanents you control gain hexproof from blue and from black until end of turn.
+    forbid: [counterspell, stax, theft]

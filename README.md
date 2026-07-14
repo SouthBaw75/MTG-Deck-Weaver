@@ -13,18 +13,24 @@ Deck Weaver's goal is to be a **master of MTG rules and play mechanics** that ca
 
 ## Project Status
 
-**Phase 0 (data foundation) is built.** The `weaver` CLI downloads all public data
-sources into a local SQLite knowledge base and answers card and rules lookups.
+**Phase 0 (data foundation) and Phase 1 (card understanding) are built.** The
+`weaver` CLI downloads all public data sources into a local SQLite knowledge base,
+answers card and rules lookups, and tags every card with its strategic roles
+(ramp, draw, removal, wincon, ...) scored by quality — validated against a
+hand-labeled 348-card golden corpus at 100% recall with zero false-positive
+violations.
 
 ### Quickstart
 
 ```bash
 pip install -e ".[dev]"      # install the weaver CLI (Python 3.11+)
 weaver update                # download + build the knowledge base (needs internet)
-weaver card "Rhystic Study"  # card lookup: oracle text, legality, Game Changer flag
+weaver card "Rhystic Study"  # card lookup: oracle text, legality, roles, Game Changer flag
 weaver rule 702.2            # Comprehensive Rules lookup (or full-text: weaver rule deathtouch)
+weaver tag                   # (re)run the role-tagging engine over all cards
+weaver tags ramp.rock        # best cards for a role; `weaver tags` lists the taxonomy
 weaver stats                 # knowledge base row counts and freshness
-pytest                       # offline test suite (50 tests, no network needed)
+pytest                       # offline test suite (500+ tests, no network needed)
 ```
 
 `weaver update` fetches from api.scryfall.com, mtgjson.com, media.wizards.com /

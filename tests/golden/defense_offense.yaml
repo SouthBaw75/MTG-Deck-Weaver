@@ -1,0 +1,706 @@
+# Golden cards for the defense_offense matcher domain.
+# expect/forbid use ONLY tags owned by this domain:
+#   protection.self, protection.board, fog, pillow-fort, deterrent, lifegain,
+#   blocker.value, wincon.combat, wincon.alt, evasion-granting, buff.anthem,
+#   extra-combat, extra-turn, burn
+cards:
+  # ---- protection.self ------------------------------------------------
+  - name: "Lightning Greaves"
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: "Artifact — Equipment"
+    oracle_text: |
+      Equipped creature has haste and shroud.
+      Equip {0}
+    expect: [protection.self]
+    forbid: [protection.board]
+
+  - name: "Swiftfoot Boots"
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: "Artifact — Equipment"
+    oracle_text: |
+      Equipped creature has hexproof and haste.
+      Equip {1}
+    expect: [protection.self]
+    forbid: [protection.board]
+
+  - name: "Mother of Runes"
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: "Creature — Human Cleric"
+    power: 1
+    toughness: 1
+    oracle_text: |
+      {T}: Target creature you control gains protection from the color of your choice until end of turn.
+    expect: [protection.self]
+    forbid: [protection.board]
+
+  - name: "Leyline of Sanctity"
+    mana_cost: "{2}{W}{W}"
+    mana_value: 4
+    type_line: "Enchantment"
+    oracle_text: |
+      If Leyline of Sanctity is in your opening hand, you may begin the game with it on the battlefield.
+      You have hexproof.
+    expect: [protection.self]
+
+  # ---- protection.board -----------------------------------------------
+  - name: "Heroic Intervention"
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: "Instant"
+    oracle_text: |
+      Permanents you control gain hexproof and indestructible until end of turn.
+    expect: [protection.board]
+    forbid: [protection.self]
+
+  - name: "Teferi's Protection"
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: "Instant"
+    oracle_text: |
+      Until your next turn, your life total can't change and you gain protection from everything. All permanents you control phase out.
+    expect: [protection.board]
+
+  - name: "Flawless Maneuver"
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: "Instant"
+    oracle_text: |
+      If you control a commander, you may cast this spell without paying its mana cost.
+      Creatures you control gain indestructible until end of turn.
+    expect: [protection.board]
+    forbid: [protection.self]
+
+  - name: "Boros Charm"
+    mana_cost: "{R}{W}"
+    mana_value: 2
+    type_line: "Instant"
+    oracle_text: |
+      Choose one —
+      • Boros Charm deals 4 damage to any target.
+      • Permanents you control gain indestructible until end of turn.
+      • Target creature gains double strike until end of turn.
+    expect: [protection.board, burn]
+    forbid: [wincon.combat]
+
+  # ---- fog --------------------------------------------------------------
+  - name: "Fog"
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: "Instant"
+    oracle_text: |
+      Prevent all combat damage that would be dealt this turn.
+    expect: [fog]
+
+  - name: "Constant Mists"
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: "Instant"
+    oracle_text: |
+      Buyback—Sacrifice a land.
+      Prevent all combat damage that would be dealt this turn.
+    expect: [fog]
+
+  - name: "Spore Frog"
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: "Creature — Frog"
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Sacrifice Spore Frog: Prevent all combat damage that would be dealt this turn.
+    expect: [fog]
+
+  # ---- pillow-fort ------------------------------------------------------
+  - name: "Ghostly Prison"
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: "Enchantment"
+    oracle_text: |
+      Creatures can't attack you unless their controller pays {2} for each creature they control that's attacking you.
+    expect: [pillow-fort]
+
+  - name: "Propaganda"
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: "Enchantment"
+    oracle_text: |
+      Creatures can't attack you unless their controller pays {2} for each creature they control that's attacking you.
+    expect: [pillow-fort]
+
+  - name: "Sphere of Safety"
+    mana_cost: "{4}{W}"
+    mana_value: 5
+    type_line: "Enchantment"
+    oracle_text: |
+      Creatures can't attack you or planeswalkers you control unless their controller pays {X} for each of those creatures, where X is the number of enchantments you control.
+    expect: [pillow-fort]
+
+  - name: "Windborn Muse"
+    mana_cost: "{3}{W}"
+    mana_value: 4
+    type_line: "Creature — Spirit"
+    power: 2
+    toughness: 3
+    keywords: [Flying]
+    oracle_text: |
+      Flying
+      Creatures can't attack you unless their controller pays {2} for each creature they control that's attacking you.
+    expect: [pillow-fort]
+    forbid: [blocker.value]
+
+  - name: "Crawlspace"
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: "Artifact"
+    oracle_text: |
+      No more than two creatures can attack you each combat.
+    expect: [pillow-fort]
+
+  - name: "Silent Arbiter"
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: "Artifact Creature — Construct"
+    power: 1
+    toughness: 5
+    oracle_text: |
+      No more than one creature can attack each combat.
+      No more than one creature can block each combat.
+    expect: [pillow-fort]
+
+  - name: "Peacekeeper"
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: "Creature — Human"
+    power: 1
+    toughness: 1
+    oracle_text: |
+      At the beginning of your upkeep, sacrifice Peacekeeper unless you pay {1}{W}.
+      Creatures can't attack.
+    expect: [pillow-fort]
+
+  # ---- deterrent ---------------------------------------------------------
+  - name: "No Mercy"
+    mana_cost: "{2}{B}{B}"
+    mana_value: 4
+    type_line: "Enchantment"
+    oracle_text: |
+      Whenever a creature deals damage to you, destroy it.
+    expect: [deterrent]
+    forbid: [pillow-fort]
+
+  - name: "Dissipation Field"
+    mana_cost: "{2}{U}{U}"
+    mana_value: 4
+    type_line: "Enchantment"
+    oracle_text: |
+      Whenever a permanent deals damage to you, return it to its owner's hand.
+    expect: [deterrent]
+
+  - name: "Michiko Konda, Truth Seeker"
+    mana_cost: "{2}{W}{W}"
+    mana_value: 4
+    type_line: "Legendary Creature — Human Advisor"
+    power: 1
+    toughness: 3
+    oracle_text: |
+      Whenever a source an opponent controls deals damage to you, that player sacrifices a permanent.
+    expect: [deterrent]
+
+  # ---- lifegain -----------------------------------------------------------
+  - name: "Aetherflux Reservoir"
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: "Artifact"
+    oracle_text: |
+      Whenever you cast a spell, you gain 1 life for each spell you've cast this turn.
+      Pay 50 life: Aetherflux Reservoir deals 50 damage to any target.
+    expect: [lifegain, wincon.alt, burn]
+
+  - name: "Exquisite Blood"
+    mana_cost: "{4}{B}"
+    mana_value: 5
+    type_line: "Enchantment"
+    oracle_text: |
+      Whenever an opponent loses life, you gain that much life.
+    expect: [lifegain]
+
+  - name: "Soul Warden"
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: "Creature — Human Cleric"
+    power: 1
+    toughness: 1
+    oracle_text: |
+      Whenever another creature enters the battlefield, you gain 1 life.
+    expect: [lifegain]
+
+  - name: "Renewed Faith"
+    mana_cost: "{2}{W}"
+    mana_value: 3
+    type_line: "Instant"
+    oracle_text: |
+      You gain 6 life.
+      Cycling {1}{W}
+      When you cycle Renewed Faith, you may gain 2 life.
+    expect: [lifegain]
+
+  - name: "Test of Endurance"
+    mana_cost: "{2}{W}{W}"
+    mana_value: 4
+    type_line: "Enchantment"
+    oracle_text: |
+      At the beginning of your upkeep, if you have 50 or more life, you win the game.
+    expect: [wincon.alt]
+    forbid: [lifegain]
+
+  # ---- blocker.value --------------------------------------------------------
+  - name: "Wall of Omens"
+    mana_cost: "{1}{W}"
+    mana_value: 2
+    type_line: "Creature — Wall"
+    power: 0
+    toughness: 4
+    keywords: [Defender]
+    oracle_text: |
+      Defender
+      When Wall of Omens enters the battlefield, draw a card.
+    expect: [blocker.value]
+
+  - name: "Sylvan Caryatid"
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: "Creature — Plant"
+    power: 0
+    toughness: 3
+    keywords: [Defender, Hexproof]
+    oracle_text: |
+      Defender, hexproof
+      {T}: Add one mana of any color.
+    expect: [blocker.value]
+    forbid: [protection.self, protection.board]
+
+  - name: "Wall of Denial"
+    mana_cost: "{1}{W}{U}"
+    mana_value: 3
+    type_line: "Creature — Wall"
+    power: 0
+    toughness: 8
+    keywords: [Defender, Flying, Shroud]
+    oracle_text: |
+      Defender, flying, shroud
+    expect: [blocker.value]
+    forbid: [protection.self]
+
+  # ---- wincon.combat ---------------------------------------------------------
+  - name: "Craterhoof Behemoth"
+    mana_cost: "{5}{G}{G}{G}"
+    mana_value: 8
+    type_line: "Creature — Beast"
+    power: 5
+    toughness: 5
+    keywords: [Haste]
+    oracle_text: |
+      Haste
+      When Craterhoof Behemoth enters the battlefield, creatures you control get +X/+X and gain trample until end of turn, where X is the number of creatures you control.
+    expect: [wincon.combat, evasion-granting]
+    forbid: [buff.anthem]
+
+  - name: "Overwhelming Stampede"
+    mana_cost: "{3}{G}{G}"
+    mana_value: 5
+    type_line: "Sorcery"
+    oracle_text: |
+      Until end of turn, creatures you control gain trample and get +X/+X, where X is the greatest power among creatures you control.
+    expect: [wincon.combat]
+    forbid: [buff.anthem]
+
+  - name: "Triumph of the Hordes"
+    mana_cost: "{2}{G}{G}"
+    mana_value: 4
+    type_line: "Sorcery"
+    oracle_text: |
+      Until end of turn, creatures you control get +1/+0 and gain infect and trample.
+    expect: [wincon.combat]
+    forbid: [buff.anthem]
+
+  - name: "Overrun"
+    mana_cost: "{2}{G}{G}{G}"
+    mana_value: 5
+    type_line: "Sorcery"
+    oracle_text: |
+      Creatures you control get +3/+3 and gain trample until end of turn.
+    expect: [wincon.combat]
+    forbid: [buff.anthem]
+
+  - name: "Master of Cruelties"
+    mana_cost: "{3}{B}{R}"
+    mana_value: 5
+    type_line: "Creature — Demon"
+    power: 1
+    toughness: 4
+    keywords: [First strike, Deathtouch]
+    oracle_text: |
+      First strike, deathtouch
+      Master of Cruelties can attack only alone.
+      Whenever Master of Cruelties attacks a player and isn't blocked, that player's life total becomes 1 and Master of Cruelties assigns no combat damage this combat.
+    expect: [wincon.combat]
+
+  - name: "Inkwell Leviathan"
+    mana_cost: "{7}{U}{U}"
+    mana_value: 9
+    type_line: "Artifact Creature — Leviathan"
+    power: 7
+    toughness: 11
+    keywords: [Islandwalk, Trample, Shroud]
+    oracle_text: |
+      Islandwalk, trample, shroud
+    expect: [wincon.combat]
+    forbid: [protection.self]
+
+  # ---- wincon.alt --------------------------------------------------------------
+  - name: "Thassa's Oracle"
+    mana_cost: "{U}{U}"
+    mana_value: 2
+    type_line: "Creature — Merfolk Wizard"
+    power: 1
+    toughness: 3
+    oracle_text: |
+      When Thassa's Oracle enters the battlefield, look at the top X cards of your library, where X is your devotion to blue. Put up to one of them on top of your library and the rest on the bottom of your library in a random order. If X is greater than or equal to the number of cards in your library, you win the game.
+    expect: [wincon.alt]
+
+  - name: "Laboratory Maniac"
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: "Creature — Human Wizard"
+    power: 2
+    toughness: 2
+    oracle_text: |
+      If you would draw a card while your library has no cards in it, you win the game instead.
+    expect: [wincon.alt]
+
+  - name: "Jace, Wielder of Mysteries"
+    mana_cost: "{2}{U}{U}"
+    mana_value: 4
+    type_line: "Legendary Planeswalker — Jace"
+    oracle_text: |
+      If you would draw a card while your library has no cards in it, you win the game instead.
+      +1: Target player mills two cards.
+      −8: Draw seven cards.
+    expect: [wincon.alt]
+
+  - name: "Approach of the Second Sun"
+    mana_cost: "{6}{W}"
+    mana_value: 7
+    type_line: "Sorcery"
+    oracle_text: |
+      If this spell was cast from your hand and you've cast another spell named Approach of the Second Sun this game, you win the game. Otherwise, put Approach of the Second Sun into its owner's library seventh from the top and you gain 7 life.
+    expect: [wincon.alt, lifegain]
+
+  - name: "Felidar Sovereign"
+    mana_cost: "{4}{W}{W}"
+    mana_value: 6
+    type_line: "Creature — Cat Beast"
+    power: 4
+    toughness: 6
+    keywords: [Vigilance, Lifelink]
+    oracle_text: |
+      Vigilance, lifelink
+      At the beginning of your upkeep, if you have 40 or more life, you win the game.
+    expect: [wincon.alt, lifegain]
+
+  - name: "Revel in Riches"
+    mana_cost: "{4}{B}"
+    mana_value: 5
+    type_line: "Enchantment"
+    oracle_text: |
+      Whenever a creature an opponent controls dies, create a Treasure token.
+      At the beginning of your upkeep, if you control ten or more Treasures, you win the game.
+    expect: [wincon.alt]
+
+  - name: "Simic Ascendancy"
+    mana_cost: "{G}{U}"
+    mana_value: 2
+    type_line: "Enchantment"
+    oracle_text: |
+      {1}{G}{U}: Put a +1/+1 counter on target creature you control.
+      Whenever one or more +1/+1 counters are put on a creature you control, put that many growth counters on Simic Ascendancy.
+      At the beginning of your upkeep, if Simic Ascendancy has twenty or more growth counters on it, you win the game.
+    expect: [wincon.alt]
+
+  - name: "Platinum Angel"
+    mana_cost: "{7}"
+    mana_value: 7
+    type_line: "Artifact Creature — Angel"
+    power: 4
+    toughness: 4
+    keywords: [Flying]
+    oracle_text: |
+      Flying
+      You can't lose the game and your opponents can't win the game.
+    expect: [wincon.alt]
+
+  # ---- evasion-granting ----------------------------------------------------------
+  - name: "Archetype of Imagination"
+    mana_cost: "{4}{U}{U}"
+    mana_value: 6
+    type_line: "Enchantment Creature — Human Wizard"
+    power: 3
+    toughness: 2
+    oracle_text: |
+      Creatures you control have flying.
+      Creatures your opponents control lose flying and can't have or gain flying.
+    expect: [evasion-granting]
+
+  - name: "Rogue's Passage"
+    mana_value: 0
+    type_line: "Land"
+    oracle_text: |
+      {T}: Add {C}.
+      {4}, {T}: Target creature can't be blocked this turn.
+    expect: [evasion-granting]
+
+  # ---- buff.anthem -----------------------------------------------------------------
+  - name: "Glorious Anthem"
+    mana_cost: "{1}{W}{W}"
+    mana_value: 3
+    type_line: "Enchantment"
+    oracle_text: |
+      Creatures you control get +1/+1.
+    expect: [buff.anthem]
+    forbid: [wincon.combat]
+
+  - name: "Beastmaster Ascension"
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: "Enchantment"
+    oracle_text: |
+      Whenever a creature you control attacks, you may put a quest counter on Beastmaster Ascension.
+      As long as Beastmaster Ascension has seven or more quest counters on it, creatures you control get +5/+5.
+    expect: [buff.anthem]
+
+  - name: "Elvish Archdruid"
+    mana_cost: "{1}{G}{G}"
+    mana_value: 3
+    type_line: "Creature — Elf Druid"
+    power: 2
+    toughness: 2
+    oracle_text: |
+      Other Elf creatures you control get +1/+1.
+      {T}: Add {G} for each Elf you control.
+    expect: [buff.anthem]
+
+  # ---- extra-combat ------------------------------------------------------------------
+  - name: "Aggravated Assault"
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: "Enchantment"
+    oracle_text: |
+      {3}{R}{R}: Untap all creatures you control. After this main phase, there is an additional combat phase followed by an additional main phase. Activate only as a sorcery.
+    expect: [extra-combat]
+
+  - name: "Moraug, Fury of Akoum"
+    mana_cost: "{4}{R}{R}"
+    mana_value: 6
+    type_line: "Legendary Creature — Minotaur Warrior"
+    power: 6
+    toughness: 6
+    oracle_text: |
+      Each creature you control gets +1/+0 for each time it has attacked this turn.
+      Landfall — Whenever a land enters the battlefield under your control, if it's your main phase, there's an additional combat phase after this phase. At the beginning of that combat, untap all creatures you control.
+    expect: [extra-combat]
+    forbid: [buff.anthem]
+
+  - name: "Combat Celebrant"
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: "Creature — Human Warrior"
+    power: 4
+    toughness: 1
+    oracle_text: |
+      You may exert Combat Celebrant as it attacks. When you do, untap all other creatures you control and after this combat phase, there is an additional combat phase.
+    expect: [extra-combat]
+
+  # ---- extra-turn --------------------------------------------------------------------
+  - name: "Time Warp"
+    mana_cost: "{3}{U}{U}"
+    mana_value: 5
+    type_line: "Sorcery"
+    oracle_text: |
+      Target player takes an extra turn after this one.
+    expect: [extra-turn]
+
+  - name: "Nexus of Fate"
+    mana_cost: "{5}{U}{U}"
+    mana_value: 7
+    type_line: "Instant"
+    oracle_text: |
+      Take an extra turn after this one.
+      If Nexus of Fate would be put into a graveyard from anywhere, reveal Nexus of Fate and shuffle it into its owner's library instead.
+    expect: [extra-turn]
+
+  - name: "Final Fortune"
+    mana_cost: "{R}{R}"
+    mana_value: 2
+    type_line: "Instant"
+    oracle_text: |
+      Take an extra turn after this one. At the beginning of that turn's end step, you lose the game.
+    expect: [extra-turn]
+    forbid: [wincon.alt]
+
+  # ---- burn ----------------------------------------------------------------------------
+  - name: "Lightning Bolt"
+    mana_cost: "{R}"
+    mana_value: 1
+    type_line: "Instant"
+    oracle_text: |
+      Lightning Bolt deals 3 damage to any target.
+    expect: [burn]
+
+  - name: "Comet Storm"
+    mana_cost: "{X}{R}{R}"
+    mana_value: 2
+    type_line: "Instant"
+    oracle_text: |
+      Multikicker {1}
+      Choose any target, then choose another target for each time this spell was kicked. Comet Storm deals X damage to each of them.
+    expect: [burn]
+
+  - name: "Torbran, Thane of Red Fell"
+    mana_cost: "{1}{R}{R}{R}"
+    mana_value: 4
+    type_line: "Legendary Creature — Dwarf Noble"
+    power: 2
+    toughness: 4
+    oracle_text: |
+      If a red source you control would deal damage to an opponent or a permanent an opponent controls, it deals that much damage plus 2 instead.
+    expect: [burn]
+
+  - name: "Earthquake"
+    mana_cost: "{X}{R}"
+    mana_value: 1
+    type_line: "Sorcery"
+    oracle_text: |
+      Earthquake deals X damage to each creature without flying and each player.
+    expect: [burn]
+
+  - name: "Exsanguinate"
+    mana_cost: "{X}{X}{B}"
+    mana_value: 1
+    type_line: "Sorcery"
+    oracle_text: |
+      Each opponent loses X life. You gain life equal to the life lost this way.
+    expect: [burn, lifegain]
+
+  # ---- tricky negatives ------------------------------------------------------------------
+  - name: "Giant Growth"
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: "Instant"
+    oracle_text: |
+      Target creature gets +3/+3 until end of turn.
+    forbid: [buff.anthem, wincon.combat]
+
+  - name: "Wrath of God"
+    mana_cost: "{2}{W}{W}"
+    mana_value: 4
+    type_line: "Sorcery"
+    oracle_text: |
+      Destroy all creatures. They can't be regenerated.
+    forbid: [fog, deterrent]
+
+  - name: "Filigree Familiar"
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: "Artifact Creature — Fox"
+    power: 2
+    toughness: 2
+    oracle_text: |
+      When Filigree Familiar enters the battlefield, you gain 2 life.
+      When Filigree Familiar dies, draw a card.
+    forbid: [lifegain]
+
+  - name: "Swords to Plowshares"
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: "Instant"
+    oracle_text: |
+      Exile target creature. Its controller gains life equal to its power.
+    forbid: [lifegain, burn]
+
+  - name: "Grizzly Bears"
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: "Creature — Bear"
+    power: 2
+    toughness: 2
+    oracle_text: ""
+    forbid: [blocker.value, wincon.combat]
+
+  - name: "Jump"
+    mana_cost: "{U}"
+    mana_value: 1
+    type_line: "Instant"
+    oracle_text: |
+      Target creature gains flying until end of turn.
+    forbid: [evasion-granting, buff.anthem]
+
+  - name: "Settle the Wreckage"
+    mana_cost: "{2}{W}{W}"
+    mana_value: 4
+    type_line: "Instant"
+    oracle_text: |
+      Exile all attacking creatures target player controls. That player may search their library for that many basic land cards, put them onto the battlefield tapped, then shuffle.
+    forbid: [fog, pillow-fort]
+
+  - name: "Shivan Dragon"
+    mana_cost: "{4}{R}{R}"
+    mana_value: 6
+    type_line: "Creature — Dragon"
+    power: 5
+    toughness: 5
+    keywords: [Flying]
+    oracle_text: |
+      Flying
+      {R}: Shivan Dragon gets +1/+0 until end of turn.
+    forbid: [wincon.combat, burn]
+
+  - name: "Slippery Bogle"
+    mana_cost: "{G/U}"
+    mana_value: 1
+    type_line: "Creature — Beast"
+    power: 1
+    toughness: 1
+    keywords: [Hexproof]
+    oracle_text: |
+      Hexproof
+    forbid: [protection.self, protection.board]
+
+  - name: "Fervor"
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: "Enchantment"
+    oracle_text: |
+      Creatures you control have haste.
+    forbid: [buff.anthem, evasion-granting]
+
+  - name: "Flame Sweep"
+    mana_cost: "{1}{R}"
+    mana_value: 2
+    type_line: "Instant"
+    oracle_text: |
+      Flame Sweep deals 2 damage to each creature with flying.
+    forbid: [burn]
+
+  - name: "Healer's Hawk"
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: "Creature — Bird"
+    power: 1
+    toughness: 1
+    keywords: [Flying, Lifelink]
+    oracle_text: |
+      Flying, lifelink
+    forbid: [lifegain, wincon.combat]
