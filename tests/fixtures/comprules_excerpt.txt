@@ -1,0 +1,122 @@
+Magic: The Gathering Comprehensive Rules
+
+These rules are effective as of February 27, 2026.
+
+Introduction
+
+This document is the ultimate authority for Magic: The Gathering competitive game play. It consists of a series of numbered rules followed by a glossary. Many of the numbered rules are divided into subrules, and each separate rule and subrule of the game has its own number. (Note that subrules skip the letters "l" and "o" due to their similarity to the numbers "1" and "0".)
+
+We at Wizards of the Coast recognize that no matter how detailed the rules, situations will arise in which the interaction of specific cards requires a precise answer. If you have questions, you can get the answers from us at Wizards.com/CustomerService.
+
+Contents
+
+1. Game Concepts
+
+100. General
+101. The Magic Golden Rules
+102. Players
+
+6. Spells, Abilities, and Effects
+
+601. Casting Spells
+602. Activating Activated Abilities
+
+7. Additional Rules
+
+701. Keyword Actions
+702. Keyword Abilities
+
+9. Casual Variants
+
+900. General
+903. Commander
+
+Glossary
+
+Credits
+
+
+1. Game Concepts
+
+100. General
+
+100.1. These Magic rules apply to any Magic game with two or more players, including two-player games and multiplayer games.
+
+100.1a A two-player game is a game that begins with only two players.
+
+100.1b A multiplayer game is a game that begins with more than two players. See section 8, "Multiplayer Rules."
+
+100.2. To play, each player needs their own deck of traditional Magic cards, small items to represent any tokens and counters, and some way to clearly track life totals.
+
+100.2a In constructed play (a way of playing in which each player creates their own deck ahead of time), each deck has a minimum deck size of 60 cards. A constructed deck may contain any number of basic land cards and no more than four of any card with a particular English name other than basic land cards.
+
+6. Spells, Abilities, and Effects
+
+601. Casting Spells
+
+601.2. To cast a spell is to take it from where it is (usually the hand), put it on the stack, and pay its costs, so that it will eventually resolve and have its effect. Casting a spell includes proposal of the spell (rules 601.2a-d) and determination and payment of costs (rules 601.2f-h). To cast a spell, a player follows the steps listed below, in order.
+
+601.2a To propose the casting of a spell, a player first moves that card (or that copy of a card) from where it is to the stack. It becomes the topmost object on the stack. It has all the characteristics of the card (or the copy of a card) associated with it, and that player becomes its controller.
+
+601.2b If the spell is modal, the player announces the mode choice (see rule 700.2). If the player wishes to splice any cards onto the spell (see rule 702.47), they reveal those cards in their hand.
+
+601.2c The player announces their choice of an appropriate player, object, or zone for each target the spell requires. A spell is said to "target" a player, object, or zone it requires.
+
+7. Additional Rules
+
+702. Keyword Abilities
+
+702.1. Most abilities describe things that happen, not characteristics a card has. But some, called keyword abilities, are used as shorthand for longer abilities or groups of abilities.
+
+702.2. Deathtouch
+
+702.2a Deathtouch is a static ability.
+
+702.2b A creature with toughness 0 or less that's been dealt damage by a source with deathtouch since the last time state-based actions were checked is destroyed as a state-based action. See rule 704.
+
+702.2c Any nonzero amount of combat damage assigned to a creature by a source with deathtouch is considered to be lethal damage for the purposes of determining if a proposed combat damage assignment is valid, regardless of that creature's toughness. See rules 510.1c-d.
+Example: A 2/2 creature with deathtouch is blocked by a 1/1 creature and a 6/6 creature. The active player may assign 1 combat damage to the first blocker and 1 combat damage to the second blocker.
+
+9. Casual Variants
+
+903. Commander
+
+903.1. In the Commander variant, each deck is led by a legendary creature designated as that deck's commander. The Commander variant was created and popularized by fans; an independent rules committee maintains additional resources at MTGCommander.net.
+
+903.3. Each deck has a legendary creature card designated as its commander. This designation is not a characteristic of the object represented by the card; rather, it is an attribute of the card itself.
+
+903.5. Each Commander deck is subject to the following deck construction rules.
+
+903.5c A card can be included in a Commander deck only if every color in its color identity is also found in the color identity of the deck's commander.
+
+Glossary
+
+Ability
+1. Text on an object that explains what that object does or can do. 2. An activated or triggered ability on the stack. See rule 113, "Abilities."
+
+Commander
+1. A designated card that leads a player's deck in the Commander casual variant. 2. The Commander variant itself. See rule 903, "Commander."
+
+Deathtouch
+A keyword ability that causes damage dealt by an object to be especially effective. See rule 702.2, "Deathtouch."
+
+Flying
+A keyword ability that restricts how a creature may be blocked. See rule 702.9, "Flying."
+
+Haste
+A keyword ability that lets a creature ignore the summoning sickness rule. See rule 702.10, "Haste."
+
+Trample
+A keyword ability that lets an attacking creature deal excess combat damage to the player, planeswalker, or battle it's attacking. See rule 702.19, "Trample."
+
+Credits
+
+Magic: The Gathering Original Game Design: Richard Garfield
+
+Comprehensive Rules Design and Development: Paul Barclay, Beth Moursund, and many others
+
+Editing: Del Laugel
+
+Published by Wizards of the Coast LLC, PO Box 707, Renton WA 98057-0707, USA. Magic: The Gathering, Magic, and their respective logos are trademarks of Wizards of the Coast LLC in the USA and other countries.
+
+(c) 2026 Wizards of the Coast LLC.
