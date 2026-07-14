@@ -1,0 +1,185 @@
+{
+  "count": 5,
+  "next": null,
+  "previous": "https://backend.commanderspellbook.com/variants/?format=json&limit=100&ordering=created",
+  "results": [
+    {
+      "id": "2069-2323",
+      "status": "OK",
+      "uses": [
+        {
+          "card": {
+            "id": 2069,
+            "name": "Godo, Bandit Warlord",
+            "oracleId": "1f74ce55-5e6c-4a04-9c68-8ec21e5b4c3a",
+            "spoiler": false,
+            "typeLine": "Legendary Creature — Human Barbarian"
+          },
+          "zoneLocations": ["C"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": true,
+          "quantity": 1
+        },
+        {
+          "card": {
+            "id": 2323,
+            "name": "Helm of the Host",
+            "oracleId": "b71f75cf-5c2a-4b3f-9f2a-2a4d3f5e6a7b",
+            "spoiler": false,
+            "typeLine": "Legendary Artifact — Equipment"
+          },
+          "zoneLocations": ["B", "H"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        }
+      ],
+      "requires": [],
+      "produces": [
+        {
+          "feature": {
+            "id": 27,
+            "name": "Infinite combat phases",
+            "uncountable": false
+          },
+          "quantity": 1
+        },
+        {
+          "feature": {
+            "id": 28,
+            "name": "Infinite attack triggers",
+            "uncountable": false
+          },
+          "quantity": 1
+        }
+      ],
+      "of": [{"id": 1721}],
+      "includes": [{"id": 1721}],
+      "identity": "R",
+      "manaNeeded": "{11}",
+      "manaValueNeeded": 11,
+      "easyPrerequisites": "",
+      "notablePrerequisites": "Godo, Bandit Warlord is your commander and is in the command zone.",
+      "description": "Cast Godo, Bandit Warlord from the command zone.\nWhen Godo enters the battlefield, search your library for Helm of the Host and put it into your hand, then cast and equip it to Godo.\nAt the beginning of combat, Helm of the Host creates a nonlegendary token copy of Godo.\nThe token's ability untaps all Samurai you control and grants an additional combat phase.\nRepeat each combat for infinite combat phases.",
+      "notes": "",
+      "popularity": 3115,
+      "spoiler": false,
+      "bracketTag": "R",
+      "legalities": {
+        "commander": true,
+        "pauperCommanderMain": false,
+        "pauperCommander": false,
+        "oathbreaker": false,
+        "predh": false,
+        "brawl": false,
+        "standardBrawl": false,
+        "competitiveBrawl": false,
+        "alchemy": false,
+        "standard": false,
+        "pioneer": false,
+        "modern": true,
+        "premodern": false,
+        "legacy": true,
+        "vintage": true,
+        "pauper": false
+      },
+      "prices": {
+        "tcgplayer": "27.60",
+        "cardkingdom": "31.99",
+        "cardmarket": "23.05"
+      },
+      "variantCount": 1
+    },
+    {
+      "id": "902-3611",
+      "status": "E",
+      "uses": [
+        {
+          "card": {
+            "id": 902,
+            "name": "Grindstone",
+            "oracleId": "3c4f8a10-2b1d-4e6f-9a8b-7c6d5e4f3a2b",
+            "spoiler": false,
+            "typeLine": "Artifact"
+          },
+          "zoneLocations": ["B"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        },
+        {
+          "card": {
+            "id": 3611,
+            "name": "Painter's Servant",
+            "oracleId": "e9b7a1c2-6d5f-4a3b-8c2d-1e0f9a8b7c6d",
+            "spoiler": false,
+            "typeLine": "Artifact Creature — Scarecrow"
+          },
+          "zoneLocations": ["B"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        }
+      ],
+      "requires": [],
+      "produces": [
+        {
+          "feature": {
+            "id": 61,
+            "name": "Infinite mill",
+            "uncountable": false
+          },
+          "quantity": 1
+        }
+      ],
+      "of": [{"id": 466}],
+      "includes": [{"id": 466}],
+      "identity": "C",
+      "manaNeeded": null,
+      "manaValueNeeded": null,
+      "easyPrerequisites": null,
+      "notablePrerequisites": null,
+      "description": null,
+      "notes": null,
+      "popularity": 2210,
+      "spoiler": false,
+      "bracketTag": "R",
+      "legalities": {
+        "commander": true,
+        "pauperCommanderMain": false,
+        "pauperCommander": false,
+        "oathbreaker": true,
+        "predh": false,
+        "brawl": false,
+        "standardBrawl": false,
+        "competitiveBrawl": false,
+        "alchemy": false,
+        "standard": false,
+        "pioneer": false,
+        "modern": false,
+        "premodern": false,
+        "legacy": true,
+        "vintage": true,
+        "pauper": false
+      },
+      "prices": {
+        "tcgplayer": "45.00",
+        "cardkingdom": "49.99",
+        "cardmarket": "38.20"
+      },
+      "variantCount": 1
+    }
+  ]
+}

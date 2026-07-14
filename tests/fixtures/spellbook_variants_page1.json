@@ -1,0 +1,286 @@
+{
+  "count": 5,
+  "next": "https://backend.commanderspellbook.com/variants/?format=json&limit=100&offset=100&ordering=created",
+  "previous": null,
+  "results": [
+    {
+      "id": "450-4131",
+      "status": "OK",
+      "uses": [
+        {
+          "card": {
+            "id": 450,
+            "name": "Basalt Monolith",
+            "oracleId": "1d67d356-3d1a-4e35-9560-fa1c1b1e40b5",
+            "spoiler": false,
+            "typeLine": "Artifact"
+          },
+          "zoneLocations": ["B"],
+          "battlefieldCardState": "Untapped",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        },
+        {
+          "card": {
+            "id": 4131,
+            "name": "Rings of Brighthearth",
+            "oracleId": "6a2b1a34-4a6f-4a45-9a5c-5a1e9e6b3f8d",
+            "spoiler": false,
+            "typeLine": "Artifact"
+          },
+          "zoneLocations": ["B"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        }
+      ],
+      "requires": [],
+      "produces": [
+        {
+          "feature": {
+            "id": 2,
+            "name": "Infinite colorless mana",
+            "uncountable": false
+          },
+          "quantity": 1
+        }
+      ],
+      "of": [{"id": 210}],
+      "includes": [{"id": 210}],
+      "identity": "C",
+      "manaNeeded": "{5}",
+      "manaValueNeeded": 5,
+      "easyPrerequisites": "",
+      "notablePrerequisites": "You control both permanents.",
+      "description": "Activate Basalt Monolith's untap ability by paying {3}.\nHolding priority, activate Rings of Brighthearth by paying {2}, copying Basalt Monolith's untap ability.\nResolve the copy, untapping Basalt Monolith.\nActivate Basalt Monolith's mana ability by tapping it, adding {3}.\nResolve Basalt Monolith's original untap ability.\nRepeat, netting {1} each time.",
+      "notes": "",
+      "popularity": 4877,
+      "spoiler": false,
+      "bracketTag": "C",
+      "legalities": {
+        "commander": true,
+        "pauperCommanderMain": false,
+        "pauperCommander": false,
+        "oathbreaker": true,
+        "predh": true,
+        "brawl": false,
+        "standardBrawl": false,
+        "competitiveBrawl": false,
+        "alchemy": false,
+        "standard": false,
+        "pioneer": false,
+        "modern": true,
+        "premodern": false,
+        "legacy": true,
+        "vintage": true,
+        "pauper": false
+      },
+      "prices": {
+        "tcgplayer": "22.15",
+        "cardkingdom": "24.98",
+        "cardmarket": "18.40"
+      },
+      "variantCount": 1
+    },
+    {
+      "id": "1478-2570",
+      "status": "OK",
+      "uses": [
+        {
+          "card": {
+            "id": 1478,
+            "name": "Demonic Consultation",
+            "oracleId": "1b3ee160-3f7d-4b1a-9d29-0e2f43a6d0e7",
+            "spoiler": false,
+            "typeLine": "Instant"
+          },
+          "zoneLocations": ["H"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        },
+        {
+          "card": {
+            "id": 2570,
+            "name": "Thassa's Oracle",
+            "oracleId": "cba9d244-95c3-4d20-be25-2b5b0c3fd1a6",
+            "spoiler": false,
+            "typeLine": "Creature — Merfolk Wizard"
+          },
+          "zoneLocations": ["H"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        }
+      ],
+      "requires": [],
+      "produces": [
+        {
+          "feature": {
+            "id": 179,
+            "name": "Win the game",
+            "uncountable": true
+          },
+          "quantity": 1
+        }
+      ],
+      "of": [{"id": 985}],
+      "includes": [{"id": 985}],
+      "identity": "UB",
+      "manaNeeded": "{U}{U}{B}",
+      "manaValueNeeded": 3,
+      "easyPrerequisites": "You are able to cast Thassa's Oracle.",
+      "notablePrerequisites": "",
+      "description": "Cast Thassa's Oracle.\nIn response to Thassa's Oracle's enters-the-battlefield triggered ability, cast Demonic Consultation, naming a card that is not in your library.\nExile your library.\nThassa's Oracle's ability resolves; your devotion to blue is greater than or equal to the number of cards in your library, so you win the game.",
+      "notes": "",
+      "popularity": 9968,
+      "spoiler": false,
+      "bracketTag": "R",
+      "legalities": {
+        "commander": true,
+        "pauperCommanderMain": false,
+        "pauperCommander": false,
+        "oathbreaker": true,
+        "predh": false,
+        "brawl": false,
+        "standardBrawl": false,
+        "competitiveBrawl": false,
+        "alchemy": false,
+        "standard": false,
+        "pioneer": true,
+        "modern": true,
+        "premodern": false,
+        "legacy": true,
+        "vintage": true,
+        "pauper": false
+      },
+      "prices": {
+        "tcgplayer": "18.02",
+        "cardkingdom": "19.78",
+        "cardmarket": "14.55"
+      },
+      "variantCount": 1
+    },
+    {
+      "id": "2836-4529--190",
+      "status": "OK",
+      "uses": [
+        {
+          "card": {
+            "id": 2836,
+            "name": "Karmic Guide",
+            "oracleId": "5f6b7f43-9c1d-4d8a-8d68-4c4e2a9d3b21",
+            "spoiler": false,
+            "typeLine": "Creature — Angel Spirit"
+          },
+          "zoneLocations": ["B"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        },
+        {
+          "card": {
+            "id": 4529,
+            "name": "Reveillark",
+            "oracleId": "9d8e2f70-1b7f-4c34-8f4c-6a1b2c3d4e5f",
+            "spoiler": false,
+            "typeLine": "Creature — Elemental"
+          },
+          "zoneLocations": ["G"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        }
+      ],
+      "requires": [
+        {
+          "template": {
+            "id": 190,
+            "name": "A free sacrifice outlet",
+            "scryfallQuery": "o:\"sacrifice a creature:\"",
+            "scryfallApi": "https://api.scryfall.com/cards/search?q=o%3A%22sacrifice+a+creature%3A%22"
+          },
+          "zoneLocations": ["B"],
+          "battlefieldCardState": "",
+          "exileCardState": "",
+          "libraryCardState": "",
+          "graveyardCardState": "",
+          "mustBeCommander": false,
+          "quantity": 1
+        }
+      ],
+      "produces": [
+        {
+          "feature": {
+            "id": 11,
+            "name": "Infinite death triggers",
+            "uncountable": false
+          },
+          "quantity": 1
+        },
+        {
+          "feature": {
+            "id": 12,
+            "name": "Infinite ETB",
+            "uncountable": false
+          },
+          "quantity": 1
+        }
+      ],
+      "of": [{"id": 1466}],
+      "includes": [{"id": 1466}],
+      "identity": "W",
+      "manaNeeded": "",
+      "manaValueNeeded": 0,
+      "easyPrerequisites": "",
+      "notablePrerequisites": "Reveillark is in your graveyard.",
+      "description": "Sacrifice Karmic Guide.\nCast Reveillark... (loop: each creature dies and returns, triggering all death and enter-the-battlefield abilities any number of times.)",
+      "notes": "",
+      "popularity": 1204,
+      "spoiler": false,
+      "bracketTag": "C",
+      "legalities": {
+        "commander": true,
+        "pauperCommanderMain": false,
+        "pauperCommander": false,
+        "oathbreaker": true,
+        "predh": false,
+        "brawl": false,
+        "standardBrawl": false,
+        "competitiveBrawl": false,
+        "alchemy": false,
+        "standard": false,
+        "pioneer": false,
+        "modern": true,
+        "premodern": false,
+        "legacy": true,
+        "vintage": true,
+        "pauper": false
+      },
+      "prices": {
+        "tcgplayer": "8.90",
+        "cardkingdom": "10.49",
+        "cardmarket": "7.12"
+      },
+      "variantCount": 3
+    }
+  ]
+}
