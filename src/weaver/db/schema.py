@@ -8,7 +8,7 @@ Conventions:
 - The `meta` table records ingest timestamps and upstream data versions.
 """
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -113,6 +113,17 @@ CREATE TABLE IF NOT EXISTS combo_cards (
     PRIMARY KEY (combo_id, card_name)
 );
 CREATE INDEX IF NOT EXISTS idx_combo_cards_name ON combo_cards(card_name);
+
+-- ------------------------------------------------------------- knowledge ----
+CREATE TABLE IF NOT EXISTS card_tags (
+    oracle_id TEXT NOT NULL,
+    tag       TEXT NOT NULL,       -- taxonomy.py role tag, e.g. 'ramp.rock'
+    quality   REAL NOT NULL DEFAULT 0.5,
+    source    TEXT NOT NULL DEFAULT 'pattern',  -- 'pattern' | 'override'
+    why       TEXT,
+    PRIMARY KEY (oracle_id, tag)
+);
+CREATE INDEX IF NOT EXISTS idx_card_tags_tag ON card_tags(tag);
 
 -- ---------------------------------------------------------- format data ----
 CREATE TABLE IF NOT EXISTS game_changers (

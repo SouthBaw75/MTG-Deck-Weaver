@@ -1,0 +1,15 @@
+# Curated tag overrides — the escape hatch for cards the pattern matchers get
+# wrong. Applied AFTER the pattern pass; this file has the last word.
+#
+# Format:
+#   - card: <exact card name>
+#     add:                       # tags to force-add
+#       - tag: sac-outlet
+#         quality: 0.95           # 0..1, default 0.7
+#         why: optional note
+#     remove:                    # pattern tags to drop (false positives)
+#       - removal.spot.creature
+#     quality:                   # adjust a pattern hit's weight, keep its why
+#       ramp.rock: 0.6
+
+[]

@@ -61,6 +61,12 @@ def update(ctx: click.Context, only: tuple[str, ...], force: bool):
         for w in r.warnings:
             console.print(f"  [yellow]warning:[/yellow] {w}")
     console.print(table)
+    # Re-tag whenever we have cards: tags derive from oracle text.
+    if conn.execute("SELECT COUNT(*) FROM cards").fetchone()[0]:
+        from weaver.knowledge.tagger import run_tagging
+
+        run_tagging(conn, progress=lambda msg: console.print(msg, style="dim"))
+        conn.commit()
     if failed:
         raise SystemExit(1)
 
@@ -100,6 +106,14 @@ def card(ctx: click.Context, name: str):
         bits.append(f"${row['price_usd']:.2f}")
     console.print(" · ".join(bits), style="dim")
 
+    tags = conn.execute(
+        "SELECT tag, quality FROM card_tags WHERE oracle_id = ? ORDER BY quality DESC, tag",
+        (row["oracle_id"],),
+    ).fetchall()
+    if tags:
+        roles = " · ".join(f"{t['tag']} ({t['quality']:.2f})" for t in tags)
+        console.print(f"roles: {roles}", style="cyan")
+
     combos = conn.execute(
         "SELECT COUNT(*) FROM combo_cards WHERE card_name = ?", (row["name"],)
     ).fetchone()[0]
@@ -138,6 +152,61 @@ def rule(ctx: click.Context, query: str):
         raise SystemExit(1)
     for h in hits:
         console.print(f"[bold]{h['rule_number']}[/bold] {h['text'][:200]}")
+
+
+@cli.command()
+@click.pass_context
+def tag(ctx: click.Context):
+    """(Re)run the role-tagging engine over the cards table."""
+    from weaver.knowledge.tagger import run_tagging
+
+    conn = _open_db(ctx.obj["db_path"])
+    report = run_tagging(conn, progress=lambda msg: console.print(msg, style="dim"))
+    conn.commit()
+    console.print(
+        f"tagged [bold]{report.cards_tagged:,}[/bold] cards with "
+        f"[bold]{report.tag_rows:,}[/bold] role tags "
+        f"({report.overrides_applied} curated overrides applied)"
+    )
+    if report.invalid_tags:
+        console.print(f"[yellow]unregistered tags ignored:[/yellow] {sorted(report.invalid_tags)}")
+
+
+@cli.command()
+@click.argument("tag_name", required=False)
+@click.option("-n", "top_n", default=15, help="How many cards to list")
+@click.pass_context
+def tags(ctx: click.Context, tag_name: str | None, top_n: int):
+    """List the tag taxonomy, or the best cards for one tag."""
+    from weaver.knowledge.taxonomy import TAGS
+
+    conn = _open_db(ctx.obj["db_path"])
+    if tag_name is None:
+        table = Table(title="Role taxonomy")
+        table.add_column("tag")
+        table.add_column("category")
+        table.add_column("cards", justify="right")
+        counts = dict(
+            conn.execute("SELECT tag, COUNT(*) FROM card_tags GROUP BY tag").fetchall()
+        )
+        for t, (category, _desc) in sorted(TAGS.items(), key=lambda kv: (kv[1][0], kv[0])):
+            table.add_row(t, category, f"{counts.get(t, 0):,}")
+        console.print(table)
+        return
+    if tag_name not in TAGS:
+        console.print(f"[red]Unknown tag[/red] {tag_name!r}. Run `weaver tags` for the list.")
+        raise SystemExit(1)
+    rows = conn.execute(
+        "SELECT c.name, ct.quality, ct.why FROM card_tags ct"
+        " JOIN cards c ON c.oracle_id = ct.oracle_id"
+        " WHERE ct.tag = ?"
+        " ORDER BY ct.quality DESC, c.edhrec_rank ASC LIMIT ?",
+        (tag_name, top_n),
+    ).fetchall()
+    console.print(f"[bold]{tag_name}[/bold] — {TAGS[tag_name][1]}")
+    for r in rows:
+        why = f"  [dim]{r['why']}[/dim]" if r["why"] else ""
+        console.print(f"  {r['quality']:.2f}  {r['name']}{why}")
 
 
 @cli.command()
