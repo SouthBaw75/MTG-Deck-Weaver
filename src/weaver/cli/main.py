@@ -1,0 +1,164 @@
+"""The `weaver` command-line interface."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import click
+from rich.console import Console
+from rich.table import Table
+
+from weaver import __version__
+from weaver.db import apply_schema, connect, default_db_path
+from weaver.db.connection import default_cache_dir
+
+console = Console()
+
+
+def _open_db(db_path: str | None):
+    conn = connect(db_path)
+    apply_schema(conn)
+    return conn
+
+
+@click.group()
+@click.version_option(__version__)
+@click.option("--db", "db_path", default=None, help="Path to the knowledge base (default: data/cache/weaver.db)")
+@click.pass_context
+def cli(ctx: click.Context, db_path: str | None):
+    """MTG Deck Weaver — Commander deck-building intelligence engine."""
+    ctx.ensure_object(dict)
+    ctx.obj["db_path"] = db_path
+
+
+@cli.command()
+@click.option("--only", multiple=True, help="Run only these ingesters (scryfall, mtgjson, rules, spellbook, curated)")
+@click.option("--force", is_flag=True, help="Re-download sources even if cached")
+@click.pass_context
+def update(ctx: click.Context, only: tuple[str, ...], force: bool):
+    """Download all data sources and (re)build the knowledge base."""
+    from weaver.ingest import run_all
+
+    conn = _open_db(ctx.obj["db_path"])
+    results = run_all(
+        conn,
+        default_cache_dir(),
+        only=set(only) or None,
+        force=force,
+        progress=lambda msg: console.print(msg, style="dim"),
+    )
+    table = Table(title="Knowledge base update")
+    table.add_column("source")
+    table.add_column("rows", justify="right")
+    table.add_column("status")
+    failed = False
+    for r in results:
+        status = r.detail or ("skipped" if r.skipped else "ok")
+        if r.detail.startswith("FAILED"):
+            failed = True
+        table.add_row(r.name, str(r.rows), status)
+        for w in r.warnings:
+            console.print(f"  [yellow]warning:[/yellow] {w}")
+    console.print(table)
+    if failed:
+        raise SystemExit(1)
+
+
+@cli.command()
+@click.argument("name")
+@click.pass_context
+def card(ctx: click.Context, name: str):
+    """Look up a card by (fuzzy) name and show what the engine knows."""
+    conn = _open_db(ctx.obj["db_path"])
+    row = conn.execute(
+        "SELECT * FROM cards WHERE name = ? COLLATE NOCASE", (name,)
+    ).fetchone()
+    if row is None:
+        row = conn.execute(
+            "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE ORDER BY edhrec_rank LIMIT 1",
+            (f"%{name}%",),
+        ).fetchone()
+    if row is None:
+        console.print(f"[red]No card found matching[/red] {name!r}. Have you run `weaver update`?")
+        raise SystemExit(1)
+
+    console.print(f"[bold]{row['name']}[/bold]  {row['mana_cost'] or ''}")
+    console.print(row["type_line"] or "")
+    if row["oracle_text"]:
+        console.print(row["oracle_text"])
+    pt = [p for p in (row["power"], row["toughness"]) if p is not None]
+    if pt:
+        console.print("/".join(pt))
+    bits = []
+    bits.append(f"commander: {row['legal_commander'] or 'unknown'}")
+    if row["is_game_changer"]:
+        bits.append("[yellow]GAME CHANGER[/yellow]")
+    if row["edhrec_rank"] is not None:
+        bits.append(f"edhrec rank: {row['edhrec_rank']}")
+    if row["price_usd"] is not None:
+        bits.append(f"${row['price_usd']:.2f}")
+    console.print(" · ".join(bits), style="dim")
+
+    combos = conn.execute(
+        "SELECT COUNT(*) FROM combo_cards WHERE card_name = ?", (row["name"],)
+    ).fetchone()[0]
+    if combos:
+        console.print(f"appears in {combos} known combos", style="dim")
+
+
+@cli.command()
+@click.argument("query")
+@click.pass_context
+def rule(ctx: click.Context, query: str):
+    """Show a Comprehensive Rule by number (e.g. 702.2) or search rules text."""
+    conn = _open_db(ctx.obj["db_path"])
+    row = conn.execute("SELECT * FROM rules WHERE rule_number = ?", (query.rstrip("."),)).fetchone()
+    if row:
+        console.print(f"[bold]{row['rule_number']}[/bold] {row['text']}")
+        subs = conn.execute(
+            "SELECT * FROM rules WHERE parent = ? ORDER BY rule_number", (row["rule_number"],)
+        ).fetchall()
+        for sub in subs:
+            console.print(f"  [bold]{sub['rule_number']}[/bold] {sub['text']}")
+        return
+    # Fall back to glossary, then full-text search.
+    g = conn.execute(
+        "SELECT * FROM glossary WHERE term = ? COLLATE NOCASE", (query,)
+    ).fetchone()
+    if g:
+        console.print(f"[bold]{g['term']}[/bold]: {g['definition']}")
+        return
+    hits = conn.execute(
+        "SELECT rule_number, text FROM rules_fts WHERE rules_fts MATCH ? LIMIT 10",
+        (query,),
+    ).fetchall()
+    if not hits:
+        console.print(f"[red]No rule or glossary entry found for[/red] {query!r}")
+        raise SystemExit(1)
+    for h in hits:
+        console.print(f"[bold]{h['rule_number']}[/bold] {h['text'][:200]}")
+
+
+@cli.command()
+@click.pass_context
+def stats(ctx: click.Context):
+    """Show knowledge base row counts and data freshness."""
+    conn = _open_db(ctx.obj["db_path"])
+    table = Table(title=f"Knowledge base: {ctx.obj['db_path'] or default_db_path()}")
+    table.add_column("table")
+    table.add_column("rows", justify="right")
+    for t in ["cards", "keywords", "card_types", "card_subtypes", "rules",
+              "glossary", "combos", "combo_cards", "game_changers", "brackets"]:
+        n = conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+        table.add_row(t, f"{n:,}")
+    console.print(table)
+    meta = conn.execute(
+        "SELECT key, value FROM meta WHERE key LIKE '%.updated_at' ORDER BY key"
+    ).fetchall()
+    for m in meta:
+        console.print(f"{m['key']}: {m['value']}", style="dim")
+
+
+if __name__ == "__main__":
+    cli()

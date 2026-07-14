@@ -1,0 +1,36 @@
+{
+  "source": "https://magic.wizards.com/en/news/announcements/commander-brackets-beta-update-february-9-2026",
+  "updated": "2026-02-09",
+  "brackets": [
+    {
+      "number": 1,
+      "name": "Exhibition",
+      "game_changer_limit": 0,
+      "description": "Ultra-casual, theme-first decks. Winning is secondary to showing off something beloved or bizarre. No Game Changers, no mass land denial, no chained extra turns; two-card infinite combos are off the table."
+    },
+    {
+      "number": 2,
+      "name": "Core",
+      "game_changer_limit": 0,
+      "description": "Precon-strength decks. Tuned enough to win, not tuned to dominate. No Game Changers, no mass land denial, no chained extra turns; two-card infinite combos are off the table."
+    },
+    {
+      "number": 3,
+      "name": "Upgraded",
+      "game_changer_limit": 3,
+      "description": "Deliberately upgraded decks beyond precon power. Up to three Game Changers. Late-game two-card combos are acceptable; no mass land denial or chained extra turns."
+    },
+    {
+      "number": 4,
+      "name": "Optimized",
+      "game_changer_limit": null,
+      "description": "High-power decks with no list restrictions beyond the banned list. Fast mana, tutors, cheap combos, and any number of Game Changers are fair game."
+    },
+    {
+      "number": 5,
+      "name": "cEDH",
+      "game_changer_limit": null,
+      "description": "Competitive EDH. Metagame-focused, maximum-efficiency decks built to win tournaments. Same card pool as bracket 4, but a shared competitive mindset."
+    }
+  ]
+}
