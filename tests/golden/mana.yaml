@@ -1,0 +1,706 @@
+# Golden cards for the mana domain (ramp, cost reduction, fixing, utility lands).
+#
+# Encoding decisions mirrored by src/weaver/knowledge/matchers/mana.py:
+#   - land fetched ONTO the battlefield by a nonland card  -> ramp.land
+#   - land tutored TO HAND (Land Tax, Weathered Wayfarer)  -> mana-fixing only
+#   - a LAND fetching lands (Evolving Wilds)               -> mana-fixing, not ramp.land
+#   - Treasure creation (Smothering Tithe)                 -> engine domain, never ramp.rock
+#   - ETB one-shot mana on a creature (Priest of Gix)      -> neither ramp.dork nor ramp.ritual
+
+cards:
+  # ---- ramp.rock ---------------------------------------------------------
+  - name: Sol Ring
+    mana_cost: "{1}"
+    mana_value: 1
+    type_line: Artifact
+    oracle_text: "{T}: Add {C}{C}."
+    produced_mana: [C]
+    expect: [ramp.rock]
+    forbid: [ramp.dork, ramp.ritual, ramp.land, mana-fixing, land.utility]
+
+  - name: Mana Crypt
+    mana_cost: "{0}"
+    mana_value: 0
+    type_line: Artifact
+    oracle_text: |-
+      At the beginning of your upkeep, flip a coin. If you lose the flip, Mana Crypt deals 3 damage to you.
+      {T}: Add {C}{C}.
+    produced_mana: [C]
+    expect: [ramp.rock]
+    forbid: [mana-fixing]
+
+  - name: Mana Vault
+    mana_cost: "{1}"
+    mana_value: 1
+    type_line: Artifact
+    oracle_text: |-
+      Mana Vault doesn't untap during your untap step.
+      At the beginning of your upkeep, you may pay {4}. If you do, untap Mana Vault.
+      At the beginning of your draw step, if Mana Vault is tapped, it deals 1 damage to you.
+      {T}: Add {C}{C}{C}.
+    produced_mana: [C]
+    expect: [ramp.rock]
+
+  - name: Chrome Mox
+    mana_cost: "{0}"
+    mana_value: 0
+    type_line: Artifact
+    oracle_text: |-
+      Imprint — When Chrome Mox enters the battlefield, you may exile a nonartifact, nonland card from your hand.
+      {T}: Add one mana of any of the exiled card's colors.
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.rock]
+
+  - name: Lotus Petal
+    mana_cost: "{0}"
+    mana_value: 0
+    type_line: Artifact
+    oracle_text: "{T}, Sacrifice Lotus Petal: Add one mana of any color."
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.rock, mana-fixing]
+
+  - name: Arcane Signet
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact
+    oracle_text: "{T}: Add one mana of any color in your commander's color identity."
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.rock, mana-fixing]
+    forbid: [ramp.dork, land.utility]
+
+  - name: Fellwar Stone
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact
+    oracle_text: "{T}: Add one mana of any color that a land an opponent controls could produce."
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.rock, mana-fixing]
+
+  - name: Azorius Signet
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact
+    oracle_text: "{1}, {T}: Add {W}{U}."
+    produced_mana: [W, U]
+    expect: [ramp.rock, mana-fixing]
+
+  - name: Commander's Sphere
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: Artifact
+    oracle_text: |-
+      {T}: Add one mana of any color in your commander's color identity.
+      Sacrifice Commander's Sphere: Draw a card.
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.rock, mana-fixing]
+
+  - name: Chromatic Lantern
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: Artifact
+    oracle_text: |-
+      Lands you control have "{T}: Add one mana of any color."
+      {T}: Add one mana of any color.
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.rock, mana-fixing]
+
+  - name: Thran Dynamo
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Artifact
+    oracle_text: "{T}: Add {C}{C}{C}."
+    produced_mana: [C]
+    expect: [ramp.rock]
+    forbid: [mana-fixing]
+
+  - name: Wild Growth
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Enchantment — Aura
+    oracle_text: |-
+      Enchant land
+      Whenever enchanted land is tapped for mana, its controller adds an additional {G}.
+    produced_mana: [G]
+    expect: [ramp.rock]
+    forbid: [ramp.dork, land.utility]
+
+  # ---- ramp.dork ---------------------------------------------------------
+  - name: Llanowar Elves
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Creature — Elf Druid
+    power: 1
+    toughness: 1
+    oracle_text: "{T}: Add {G}."
+    produced_mana: [G]
+    expect: [ramp.dork]
+    forbid: [ramp.rock, ramp.ritual, mana-fixing, ramp.land]
+
+  - name: Elvish Mystic
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Creature — Elf Druid
+    power: 1
+    toughness: 1
+    oracle_text: "{T}: Add {G}."
+    produced_mana: [G]
+    expect: [ramp.dork]
+    forbid: [ramp.rock]
+
+  - name: Birds of Paradise
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Creature — Bird
+    power: 0
+    toughness: 1
+    keywords: [Flying]
+    oracle_text: |-
+      Flying
+      {T}: Add one mana of any color.
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.dork, mana-fixing]
+    forbid: [ramp.rock]
+
+  - name: Avacyn's Pilgrim
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Creature — Human Monk
+    power: 1
+    toughness: 1
+    oracle_text: "{T}: Add {W}."
+    produced_mana: [W]
+    expect: [ramp.dork]
+
+  - name: Priest of Titania
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Elf Druid
+    power: 1
+    toughness: 1
+    oracle_text: "{T}: Add {G} for each Elf on the battlefield."
+    produced_mana: [G]
+    expect: [ramp.dork]
+    forbid: [ramp.rock]
+
+  - name: Faeburrow Elder
+    mana_cost: "{1}{G}{W}"
+    mana_value: 3
+    type_line: Creature — Treefolk Druid
+    power: 0
+    toughness: 0
+    keywords: [Vigilance]
+    oracle_text: |-
+      Vigilance
+      Faeburrow Elder gets +1/+1 for each color among permanents you control.
+      {T}: Add one mana of each color among permanents you control.
+    produced_mana: [W, U, B, R, G]
+    expect: [ramp.dork, mana-fixing]
+
+  # ---- ramp.ritual -------------------------------------------------------
+  - name: Dark Ritual
+    mana_cost: "{B}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: "Add {B}{B}{B}."
+    produced_mana: [B]
+    expect: [ramp.ritual]
+    forbid: [ramp.rock, ramp.dork, mana-fixing]
+
+  - name: Cabal Ritual
+    mana_cost: "{1}{B}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: |-
+      Add {B}{B}{B}.
+      Threshold — Add {B}{B}{B}{B}{B} instead if seven or more cards are in your graveyard.
+    produced_mana: [B]
+    expect: [ramp.ritual]
+
+  - name: Pyretic Ritual
+    mana_cost: "{1}{R}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: "Add {R}{R}{R}."
+    produced_mana: [R]
+    expect: [ramp.ritual]
+
+  - name: Seething Song
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: "Add {R}{R}{R}{R}{R}."
+    produced_mana: [R]
+    expect: [ramp.ritual]
+    forbid: [ramp.rock]
+
+  - name: Jeska's Will
+    mana_cost: "{2}{R}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: |-
+      Choose one. If you control a commander as you cast this spell, you may choose both.
+      • Add {R} for each card in target opponent's hand.
+      • Exile the top three cards of your library. You may play them this turn.
+    produced_mana: [R]
+    expect: [ramp.ritual]
+
+  - name: Mana Geyser
+    mana_cost: "{3}{R}{R}"
+    mana_value: 5
+    type_line: Sorcery
+    oracle_text: "Add {R} for each tapped land your opponents control."
+    produced_mana: [R]
+    expect: [ramp.ritual]
+
+  # ---- ramp.land ---------------------------------------------------------
+  - name: Cultivate
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Sorcery
+    oracle_text: >-
+      Search your library for up to two basic land cards, reveal those cards,
+      put one onto the battlefield tapped and the other into your hand, then
+      shuffle.
+    expect: [ramp.land, mana-fixing]
+    forbid: [ramp.rock, ramp.dork, ramp.ritual]
+
+  - name: Kodama's Reach
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Sorcery — Arcane
+    oracle_text: >-
+      Search your library for up to two basic land cards, reveal those cards,
+      put one onto the battlefield tapped and the other into your hand, then
+      shuffle.
+    expect: [ramp.land, mana-fixing]
+
+  - name: Rampant Growth
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Sorcery
+    oracle_text: >-
+      Search your library for a basic land card, put that card onto the
+      battlefield tapped, then shuffle.
+    expect: [ramp.land]
+    forbid: [ramp.ritual]
+
+  - name: Farseek
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Sorcery
+    oracle_text: >-
+      Search your library for a Plains, Island, Swamp, or Mountain card, put it
+      onto the battlefield tapped, then shuffle.
+    expect: [ramp.land, mana-fixing]
+
+  - name: Nature's Lore
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Sorcery
+    oracle_text: >-
+      Search your library for a Forest card, put that card onto the
+      battlefield, then shuffle.
+    expect: [ramp.land]
+
+  - name: Three Visits
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Sorcery
+    oracle_text: >-
+      Search your library for a Forest card, put that card onto the
+      battlefield, then shuffle.
+    expect: [ramp.land]
+
+  - name: Skyshroud Claim
+    mana_cost: "{3}{G}"
+    mana_value: 4
+    type_line: Sorcery
+    oracle_text: >-
+      Search your library for up to two Forest cards, put them onto the
+      battlefield, then shuffle.
+    expect: [ramp.land]
+
+  - name: Sakura-Tribe Elder
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Snake Shaman
+    power: 1
+    toughness: 1
+    oracle_text: >-
+      Sacrifice Sakura-Tribe Elder: Search your library for a basic land card,
+      put that card onto the battlefield tapped, then shuffle.
+    expect: [ramp.land]
+    forbid: [ramp.dork, ramp.rock]
+
+  - name: Wood Elves
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Creature — Elf Scout
+    power: 1
+    toughness: 1
+    oracle_text: >-
+      When Wood Elves enters the battlefield, search your library for a Forest
+      card, put that card onto the battlefield, then shuffle.
+    expect: [ramp.land]
+    forbid: [ramp.dork]
+
+  - name: Solemn Simulacrum
+    mana_cost: "{4}"
+    mana_value: 4
+    type_line: Artifact Creature — Golem
+    power: 2
+    toughness: 2
+    oracle_text: |-
+      When Solemn Simulacrum enters the battlefield, you may search your library for a basic land card, put that card onto the battlefield tapped, then shuffle.
+      When Solemn Simulacrum dies, you may draw a card.
+    expect: [ramp.land]
+    forbid: [ramp.rock, ramp.dork]
+
+  - name: Wayfarer's Bauble
+    mana_cost: "{1}"
+    mana_value: 1
+    type_line: Artifact
+    oracle_text: >-
+      {2}, {T}, Sacrifice Wayfarer's Bauble: Search your library for a basic
+      land card, put that card onto the battlefield tapped, then shuffle.
+    expect: [ramp.land]
+    forbid: [ramp.rock]
+
+  - name: Sword of the Animist
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact — Equipment
+    oracle_text: |-
+      Equipped creature gets +1/+1.
+      Whenever equipped creature attacks, you may search your library for a basic land card, put it onto the battlefield tapped, then shuffle.
+      Equip {2}
+    expect: [ramp.land]
+    forbid: [ramp.rock]
+
+  - name: Exploration
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Enchantment
+    oracle_text: "You may play an additional land on each of your turns."
+    expect: [ramp.land]
+    forbid: [ramp.rock, mana-fixing]
+
+  - name: Burgeoning
+    mana_cost: "{G}"
+    mana_value: 1
+    type_line: Enchantment
+    oracle_text: >-
+      Whenever an opponent plays a land, you may put a land card from your hand
+      onto the battlefield.
+    expect: [ramp.land]
+    forbid: [ramp.rock]
+
+  - name: Azusa, Lost but Seeking
+    mana_cost: "{2}{G}"
+    mana_value: 3
+    type_line: Legendary Creature — Human Monk
+    power: 1
+    toughness: 2
+    oracle_text: "You may play two additional lands on each of your turns."
+    expect: [ramp.land]
+    forbid: [ramp.dork]
+
+  - name: Oracle of Mul Daya
+    mana_cost: "{3}{G}"
+    mana_value: 4
+    type_line: Creature — Elf Shaman
+    power: 2
+    toughness: 2
+    oracle_text: |-
+      You may play an additional land on each of your turns.
+      Play with the top card of your library revealed.
+      You may play lands from the top of your library.
+    expect: [ramp.land]
+    forbid: [ramp.dork]
+
+  - name: Growth Spiral
+    mana_cost: "{G}{U}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: "Draw a card. You may put a land card from your hand onto the battlefield."
+    expect: [ramp.land]
+    forbid: [ramp.ritual]
+
+  # ---- cost-reduction ------------------------------------------------------
+  - name: Goreclaw, Terror of Qal Sisma
+    mana_cost: "{3}{G}"
+    mana_value: 4
+    type_line: Legendary Creature — Bear
+    power: 4
+    toughness: 3
+    oracle_text: |-
+      Creature spells you cast with power 4 or greater cost {2} less to cast.
+      Whenever Goreclaw, Terror of Qal Sisma attacks, each creature you control with power 4 or greater gains trample until end of turn.
+    expect: [cost-reduction]
+    forbid: [ramp.dork]
+
+  - name: Cloud Key
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: Artifact
+    oracle_text: |-
+      As Cloud Key enters the battlefield, choose artifact, creature, enchantment, instant, or sorcery.
+      Spells you cast of the chosen type cost {1} less to cast.
+    expect: [cost-reduction]
+    forbid: [ramp.rock]
+
+  - name: Ruby Medallion
+    mana_cost: "{2}"
+    mana_value: 2
+    type_line: Artifact
+    oracle_text: "Red spells you cast cost {1} less to cast."
+    expect: [cost-reduction]
+    forbid: [ramp.rock]
+
+  - name: Foundry Inspector
+    mana_cost: "{3}"
+    mana_value: 3
+    type_line: Artifact Creature — Construct
+    power: 3
+    toughness: 2
+    oracle_text: "Artifact spells you cast cost {1} less to cast."
+    expect: [cost-reduction]
+    forbid: [ramp.rock, ramp.dork]
+
+  - name: Heartless Summoning
+    mana_cost: "{1}{B}"
+    mana_value: 2
+    type_line: Enchantment
+    oracle_text: |-
+      Creature spells you cast cost {2} less to cast.
+      Creatures you control get -1/-1.
+    expect: [cost-reduction]
+    forbid: [ramp.rock]
+
+  # ---- mana-fixing (lands and tutors-to-hand) -------------------------------
+  - name: Command Tower
+    mana_value: 0
+    type_line: Land
+    oracle_text: "{T}: Add one mana of any color in your commander's color identity."
+    produced_mana: [W, U, B, R, G]
+    expect: [mana-fixing]
+    forbid: [land.utility, ramp.land, ramp.rock]
+
+  - name: Exotic Orchard
+    mana_value: 0
+    type_line: Land
+    oracle_text: "{T}: Add one mana of any color that a land an opponent controls could produce."
+    produced_mana: [W, U, B, R, G]
+    expect: [mana-fixing]
+    forbid: [land.utility, ramp.rock]
+
+  - name: Evolving Wilds
+    mana_value: 0
+    type_line: Land
+    oracle_text: >-
+      {T}, Sacrifice Evolving Wilds: Search your library for a basic land card,
+      put it onto the battlefield tapped, then shuffle.
+    expect: [mana-fixing]
+    forbid: [ramp.land, land.utility]
+
+  - name: Simic Guildgate
+    mana_value: 0
+    type_line: Land — Gate
+    oracle_text: |-
+      Simic Guildgate enters the battlefield tapped.
+      {T}: Add {G} or {U}.
+    produced_mana: [G, U]
+    expect: [mana-fixing]
+    forbid: [land.utility, ramp.land]
+
+  - name: Weathered Wayfarer
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: Creature — Human Nomad Cleric
+    power: 1
+    toughness: 1
+    oracle_text: >-
+      {W}, {T}: Search your library for a land card, reveal it, put it into
+      your hand, then shuffle. Activate only if an opponent controls more lands
+      than you.
+    expect: [mana-fixing]
+    forbid: [ramp.land, ramp.dork]
+
+  # ---- land.utility ---------------------------------------------------------
+  - name: Rogue's Passage
+    mana_value: 0
+    type_line: Land
+    oracle_text: |-
+      {T}: Add {C}.
+      {4}, {T}: Target creature can't be blocked this turn.
+    produced_mana: [C]
+    expect: [land.utility]
+    forbid: [mana-fixing, ramp.land]
+
+  - name: Inventors' Fair
+    mana_value: 0
+    type_line: Legendary Land
+    oracle_text: |-
+      At the beginning of your upkeep, if you control three or more artifacts, you gain 1 life.
+      {T}: Add {C}.
+      {4}, {T}, Sacrifice Inventors' Fair: Search your library for an artifact card, reveal it, put it into your hand, then shuffle. Activate only if you control three or more artifacts.
+    produced_mana: [C]
+    expect: [land.utility]
+    forbid: [mana-fixing, ramp.land]
+
+  - name: Nykthos, Shrine to Nyx
+    mana_value: 0
+    type_line: Legendary Land
+    oracle_text: |-
+      {T}: Add {C}.
+      {2}, {T}: Choose a color. Add an amount of mana of that color equal to your devotion to that color.
+    produced_mana: [C]
+    expect: [land.utility]
+    forbid: [ramp.land]
+
+  - name: Gaea's Cradle
+    mana_value: 0
+    type_line: Legendary Land
+    oracle_text: "{T}: Add {G} for each creature you control."
+    produced_mana: [G]
+    expect: [land.utility]
+    forbid: [mana-fixing]
+
+  - name: Mutavault
+    mana_value: 0
+    type_line: Land
+    oracle_text: |-
+      {1}: Mutavault becomes a 2/2 creature with all creature types until end of turn. It's still a land.
+      {T}: Add {C}.
+    produced_mana: [C]
+    expect: [land.utility]
+    forbid: [ramp.dork]
+
+  - name: Radiant Fountain
+    mana_value: 0
+    type_line: Land
+    oracle_text: |-
+      When Radiant Fountain enters the battlefield, you gain 2 life.
+      {T}: Add {C}.
+    produced_mana: [C]
+    expect: [land.utility]  # barely qualifies: matcher gives it a very low quality
+    forbid: [mana-fixing]
+
+  # ---- tricky negatives -------------------------------------------------------
+  - name: Swords to Plowshares
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: "Exile target creature. Its controller gains life equal to its power."
+    expect: []
+    forbid: [ramp.land, ramp.rock, ramp.dork, ramp.ritual, cost-reduction, mana-fixing, land.utility]
+
+  - name: Counterspell
+    mana_cost: "{U}{U}"
+    mana_value: 2
+    type_line: Instant
+    oracle_text: "Counter target spell."
+    expect: []
+    forbid: [ramp.land, ramp.rock, ramp.dork, ramp.ritual, cost-reduction, mana-fixing, land.utility]
+
+  - name: Rhystic Study
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Enchantment
+    oracle_text: >-
+      Whenever an opponent casts a spell, you may draw a card unless that
+      player pays {1}.
+    expect: []
+    forbid: [ramp.rock, ramp.ritual, cost-reduction, mana-fixing]
+
+  - name: Smothering Tithe
+    mana_cost: "{3}{W}"
+    mana_value: 4
+    type_line: Enchantment
+    oracle_text: >-
+      Whenever an opponent draws a card, that player may pay {2}. If the player
+      doesn't, you create a Treasure token.
+    expect: []  # Treasure creation is engine-domain (treasure-producer), not ours
+    forbid: [ramp.rock, ramp.ritual, ramp.land, mana-fixing, cost-reduction]
+
+  - name: Grizzly Bears
+    mana_cost: "{1}{G}"
+    mana_value: 2
+    type_line: Creature — Bear
+    power: 2
+    toughness: 2
+    oracle_text: ""
+    expect: []
+    forbid: [ramp.land, ramp.rock, ramp.dork, ramp.ritual, cost-reduction, mana-fixing, land.utility]
+
+  - name: Lightning Bolt
+    mana_cost: "{R}"
+    mana_value: 1
+    type_line: Instant
+    oracle_text: "Lightning Bolt deals 3 damage to any target."
+    expect: []
+    forbid: [ramp.ritual, ramp.land, mana-fixing]
+
+  - name: Thalia, Guardian of Thraben
+    mana_cost: "{1}{W}"
+    mana_value: 2
+    type_line: Legendary Creature — Human Soldier
+    power: 2
+    toughness: 1
+    keywords: [First strike]
+    oracle_text: |-
+      First strike
+      Noncreature spells cost {1} more to cast.
+    expect: []  # taxing is interaction-domain
+    forbid: [cost-reduction, ramp.dork, ramp.rock]
+
+  - name: Land Tax
+    mana_cost: "{W}"
+    mana_value: 1
+    type_line: Enchantment
+    oracle_text: >-
+      At the beginning of your upkeep, if an opponent controls more lands than
+      you, you may search your library for up to three basic land cards, reveal
+      them, put them into your hand, then shuffle.
+    expect: [mana-fixing]  # to-hand land search = fixing, never ramp.land
+    forbid: [ramp.land, ramp.rock]
+
+  - name: Trinket Mage
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Creature — Human Wizard
+    power: 2
+    toughness: 2
+    oracle_text: >-
+      When Trinket Mage enters the battlefield, you may search your library for
+      an artifact card with mana value 1 or less, reveal that card, put it into
+      your hand, then shuffle.
+    expect: []
+    forbid: [ramp.land, mana-fixing, ramp.dork]
+
+  - name: Frantic Search
+    mana_cost: "{2}{U}"
+    mana_value: 3
+    type_line: Instant
+    oracle_text: "Draw two cards, then discard two cards. Untap up to three lands."
+    expect: []
+    forbid: [ramp.ritual, ramp.land, mana-fixing]
+
+  - name: Priest of Gix
+    mana_cost: "{2}{B}"
+    mana_value: 3
+    type_line: Creature — Phyrexian Human Cleric
+    power: 2
+    toughness: 1
+    oracle_text: "When Priest of Gix enters the battlefield, add {B}{B}{B}."
+    produced_mana: [B]
+    expect: []  # one-shot ETB mana: not a repeatable dork, not an instant/sorcery ritual
+    forbid: [ramp.dork, ramp.ritual, ramp.rock]
+
+  - name: Forest
+    mana_value: 0
+    type_line: Basic Land — Forest
+    oracle_text: ""
+    produced_mana: [G]
+    expect: []
+    forbid: [land.utility, mana-fixing, ramp.land]
