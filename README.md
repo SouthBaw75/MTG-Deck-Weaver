@@ -1,5 +1,7 @@
 # MTG Deck Weaver
 
+![The Deck Weaver at the loom](assets/splash.png)
+
 A Commander (EDH) deck-building intelligence engine for Magic: The Gathering.
 
 Deck Weaver's goal is to be a **master of MTG rules and play mechanics** that can:
