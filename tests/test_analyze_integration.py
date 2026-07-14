@@ -71,7 +71,9 @@ def test_full_analysis_runs_all_sections(deck_db):
     assert not deck.unresolved
 
     sections = {s.title: s for s in analyze_deck(deck)}
-    assert set(sections) == {"Overview", "Legality & Bracket", "Role Coverage", "Mana Base"}
+    # The four core sections must always be present; more (combo, consistency,
+    # weakness) may be added as the report grows.
+    assert {"Overview", "Legality & Bracket", "Role Coverage", "Mana Base"} <= set(sections)
 
     # Legality: legal size, legal commander, no banned, GC floor computed.
     legality = sections["Legality & Bracket"]

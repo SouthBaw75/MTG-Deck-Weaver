@@ -64,4 +64,17 @@ def load_deck(conn: sqlite3.Connection, text: str) -> DeckView:
                 is_game_changer=bool(row["is_game_changer"]),
             )
         )
-    return DeckView(cards=cards, unresolved=unresolved)
+    deck = DeckView(cards=cards, unresolved=unresolved)
+
+    # Attach combo detection when the mirror is populated. Non-fatal: a deck
+    # still analyzes fine if the combos tables are empty.
+    try:
+        from weaver.analysis.combos import detect_deck_combos
+
+        if conn.execute("SELECT 1 FROM combos LIMIT 1").fetchone():
+            present, near = detect_deck_combos(conn, deck)
+            deck.combos_present = present
+            deck.combos_near_miss = near
+    except sqlite3.Error:
+        pass
+    return deck
