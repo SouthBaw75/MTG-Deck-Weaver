@@ -132,9 +132,7 @@ function ensureModal() {
     onclick: (e) => { if (e.target === overlay) closeCardModal(); },
   }, [dialog]);
   document.body.append(overlay);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !overlay.hidden) closeCardModal();
-  });
+  // Escape is handled by the unified overlay keydown listener (see below).
   _modal = { overlay, dialog, body, closeBtn };
   return _modal;
 }
@@ -163,17 +161,75 @@ async function openCardModal(name) {
 function closeCardModal() {
   if (!_modal || _modal.overlay.hidden) return;
   _modal.overlay.hidden = true;
-  document.body.classList.remove("modal-open");
+  if (!imgLightboxOpen()) document.body.classList.remove("modal-open");
   if (_modalReturnFocus && _modalReturnFocus.focus) _modalReturnFocus.focus();
 }
 
-// One document-level listener catches every card-link click in the app.
+/* ---------- Image lightbox (enlarge a card image) ------------------------- */
+let _lightbox = null;
+
+function imgLightboxOpen() {
+  return !!_lightbox && !_lightbox.overlay.hidden;
+}
+
+function ensureLightbox() {
+  if (_lightbox) return _lightbox;
+  const img = el("img", { class: "img-lightbox__img", alt: "" });
+  const overlay = el("div", {
+    class: "img-lightbox", hidden: "", "aria-hidden": "true",
+    onclick: closeImgLightbox,
+  }, [img]);
+  document.body.append(overlay);
+  _lightbox = { overlay, img };
+  return _lightbox;
+}
+
+function openImgLightbox(src, alt) {
+  if (!src) return;
+  const { overlay, img } = ensureLightbox();
+  img.src = src;
+  img.alt = alt || "Card image";
+  overlay.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeImgLightbox() {
+  if (!imgLightboxOpen()) return;
+  _lightbox.overlay.hidden = true;
+  // Keep scroll locked if the card modal is still open underneath.
+  if (!_modal || _modal.overlay.hidden) document.body.classList.remove("modal-open");
+}
+
+// One document-level listener catches card-name links AND card-image clicks.
 document.addEventListener("click", (e) => {
+  const image = e.target.closest(".card-image");
+  if (image) {
+    e.preventDefault();
+    openImgLightbox(image.currentSrc || image.src, image.alt);
+    return;
+  }
   const link = e.target.closest(".card-link[data-card]");
   if (link) {
     e.preventDefault();
     openCardModal(link.getAttribute("data-card"));
   }
+});
+
+// Keyboard: Enter/Space enlarges a focused card image.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const image = e.target.closest?.(".card-image");
+  if (image) {
+    e.preventDefault();
+    openImgLightbox(image.currentSrc || image.src, image.alt);
+  }
+});
+
+// Single Escape handler for the layered overlays (topmost first).
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (imgLightboxOpen()) { closeImgLightbox(); return; }
+  if (_modal && !_modal.overlay.hidden) { closeCardModal(); return; }
 });
 
 /* ---------- Theme ---------------------------------------------------------- */
@@ -358,6 +414,10 @@ function renderCard(card) {
       src: card.image_url,
       alt: `${card.name} card image`,
       loading: "lazy",
+      role: "button",
+      tabindex: "0",
+      title: "Click to enlarge",
+      "aria-label": `Enlarge ${card.name} image`,
       onerror: (e) => e.target.remove(),
     }));
   }
