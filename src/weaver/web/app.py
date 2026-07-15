@@ -38,13 +38,30 @@ class BuildBody(BaseModel):
     owned: list[str] | None = None
 
 
-def create_app(db_path: str | None = None) -> FastAPI:
+class DeckSaveBody(BaseModel):
+    name: str
+    decklist: str
+    commander: str | None = None
+    bracket: int | None = None
+    notes: str | None = None
+    id: int | None = None  # present -> update that deck
+
+
+class DeckRenameBody(BaseModel):
+    name: str
+
+
+def create_app(db_path: str | None = None, decks_db_path: str | None = None) -> FastAPI:
     app = FastAPI(title="MTG Deck Weaver", version="0.1.0")
 
     def db():
         conn = connect(db_path)
         apply_schema(conn)
         return conn
+
+    def decks_db():
+        from weaver.decks.store import connect_decks
+        return connect_decks(decks_db_path)
 
     def _require_cards(conn):
         if conn.execute("SELECT COUNT(*) FROM cards").fetchone()[0] == 0:
@@ -143,6 +160,65 @@ def create_app(db_path: str | None = None) -> FastAPI:
         deck = load_deck(conn, payload["decklist"])
         payload["validation"] = analysis_to_dict(deck, analyze_deck(deck))
         return payload
+
+    # ---- saved decks -------------------------------------------------------
+    def _deck_row(row) -> dict:
+        from weaver.analysis.deck import parse_decklist
+        entries = parse_decklist(row["decklist"])
+        return {
+            "id": row["id"],
+            "name": row["name"],
+            "commander": row["commander"],
+            "bracket": row["bracket"],
+            "notes": row["notes"] if "notes" in row.keys() else None,
+            "card_count": sum(e.quantity for e in entries),
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+        }
+
+    @app.get("/api/decks")
+    def decks_list():
+        from weaver.decks.store import list_decks
+        return [_deck_row(r) for r in list_decks(decks_db())]
+
+    @app.post("/api/decks")
+    def decks_save(body: DeckSaveBody):
+        from weaver.decks.store import save_deck
+        try:
+            did = save_deck(
+                decks_db(), name=body.name, decklist=body.decklist,
+                commander=body.commander, bracket=body.bracket, notes=body.notes,
+                deck_id=body.id,
+            )
+        except KeyError as exc:
+            raise HTTPException(404, str(exc))
+        return {"id": did}
+
+    @app.get("/api/decks/{deck_id}")
+    def decks_get(deck_id: int):
+        from weaver.decks.store import get_deck
+        row = get_deck(decks_db(), deck_id)
+        if row is None:
+            raise HTTPException(404, f"no deck with id {deck_id}")
+        d = _deck_row(row)
+        d["decklist"] = row["decklist"]
+        return d
+
+    @app.put("/api/decks/{deck_id}")
+    def decks_rename(deck_id: int, body: DeckRenameBody):
+        from weaver.decks.store import rename_deck
+        try:
+            rename_deck(decks_db(), deck_id, body.name)
+        except KeyError as exc:
+            raise HTTPException(404, str(exc))
+        return {"id": deck_id, "name": body.name}
+
+    @app.delete("/api/decks/{deck_id}")
+    def decks_delete(deck_id: int):
+        from weaver.decks.store import delete_deck
+        if not delete_deck(decks_db(), deck_id):
+            raise HTTPException(404, f"no deck with id {deck_id}")
+        return {"deleted": deck_id}
 
     # ---- static frontend ---------------------------------------------------
     @app.get("/splash.png")

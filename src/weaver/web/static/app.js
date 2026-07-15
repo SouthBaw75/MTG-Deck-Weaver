@@ -498,6 +498,7 @@ function initAnalyze() {
     try {
       const result = await api("/api/analyze", { method: "POST", body: JSON.stringify({ decklist }) });
       out.innerHTML = "";
+      out.append(saveBar(decklist, { commander: result.commanders && result.commanders[0] }));
       out.append(renderAnalysis(result));
     } catch (err) {
       out.innerHTML = "";
@@ -822,6 +823,7 @@ function renderDossier(d) {
     d.notes.forEach((n) => notes.append(el("li", { text: n })));
     head.append(notes);
   }
+  head.append(saveBar(d.decklist, { commander: d.commander, bracket: d.bracket }));
   frag.append(head);
 
   // ---- Card groups ----
@@ -925,12 +927,116 @@ function loadingNode(label) {
 /* =============================================================================
    ROUTER
    ========================================================================== */
-const ROUTES = ["home", "card", "analyze", "build"];
+/* =============================================================================
+   SAVED DECKS
+   ========================================================================== */
+
+/** Inline "Save deck" control appended to analyze/build results. */
+function saveBar(decklist, opts = {}) {
+  const { commander, bracket } = opts;
+  const wrap = el("div", { class: "save-bar" });
+  const btn = el("button", { type: "button", class: "btn btn--ghost",
+    text: "★ Save deck",
+    onclick: () => {
+      wrap.innerHTML = "";
+      const input = el("input", { class: "input save-bar__input", type: "text",
+        value: commander || "My deck", "aria-label": "Deck name" });
+      const doSave = async () => {
+        try {
+          await api("/api/decks", { method: "POST", body: JSON.stringify({
+            name: input.value.trim() || "My deck", decklist, commander, bracket,
+          }) });
+          wrap.innerHTML = "";
+          wrap.append(el("span", { class: "save-bar__done", text: "✓ Saved to My Decks" }));
+        } catch (err) { showToast(err.message); }
+      };
+      const save = el("button", { type: "button", class: "btn btn--primary", text: "Save", onclick: doSave });
+      const cancel = el("button", { type: "button", class: "btn btn--ghost", text: "Cancel",
+        onclick: () => wrap.replaceWith(saveBar(decklist, opts)) });
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); doSave(); } });
+      wrap.append(input, save, cancel);
+      input.focus(); input.select();
+    },
+  });
+  wrap.append(btn);
+  return wrap;
+}
+
+async function loadDecks() {
+  const out = $("#decks-list");
+  out.innerHTML = "";
+  out.append(loadingNode("Loading your decks…"));
+  try {
+    const decks = await api("/api/decks");
+    out.innerHTML = "";
+    if (!decks.length) {
+      out.append(el("div", { class: "banner banner--empty",
+        text: "No saved decks yet. Build or analyze a deck, then click “Save deck”." }));
+      return;
+    }
+    const list = el("div", { class: "deck-cards" });
+    decks.forEach((d) => list.append(renderDeckRow(d)));
+    out.append(list);
+  } catch (err) {
+    out.innerHTML = "";
+    out.append(el("div", { class: "banner banner--empty", text: err.message }));
+  }
+}
+
+function renderDeckRow(d) {
+  const meta = [d.commander || "no commander", `${d.card_count} cards`,
+    d.bracket ? `bracket ${d.bracket}` : null].filter(Boolean).join("  ·  ");
+  return el("div", { class: "deck-card" }, [
+    el("div", { class: "deck-card__main" }, [
+      el("div", { class: "deck-card__name", text: d.name }),
+      el("div", { class: "deck-card__meta", text: meta }),
+    ]),
+    el("div", { class: "deck-card__actions" }, [
+      el("button", { type: "button", class: "btn btn--ghost", text: "Open",
+        onclick: () => openSavedDeck(d.id) }),
+      el("button", { type: "button", class: "btn btn--ghost", text: "Rename",
+        onclick: () => renameSavedDeck(d) }),
+      el("button", { type: "button", class: "btn btn--ghost btn--danger", text: "Delete",
+        onclick: () => deleteSavedDeck(d) }),
+    ]),
+  ]);
+}
+
+async function openSavedDeck(id) {
+  try {
+    const d = await api(`/api/decks/${id}`);
+    location.hash = "#analyze";
+    setTimeout(() => {
+      const input = $("#analyze-input");
+      if (input) { input.value = d.decklist; $("#analyze-form").requestSubmit(); }
+    }, 40);
+  } catch (err) { showToast(err.message); }
+}
+
+async function renameSavedDeck(d) {
+  const name = window.prompt("Rename deck:", d.name);
+  if (name == null) return;
+  try {
+    await api(`/api/decks/${d.id}`, { method: "PUT", body: JSON.stringify({ name }) });
+    loadDecks();
+  } catch (err) { showToast(err.message); }
+}
+
+async function deleteSavedDeck(d) {
+  if (!window.confirm(`Delete “${d.name}”? This can't be undone.`)) return;
+  try {
+    await api(`/api/decks/${d.id}`, { method: "DELETE" });
+    loadDecks();
+  } catch (err) { showToast(err.message); }
+}
+
+const ROUTES = ["home", "card", "analyze", "build", "decks"];
 const VIEWS = {
   home: $("#view-home"),
   card: $("#view-card"),
   analyze: $("#view-analyze"),
   build: $("#view-build"),
+  decks: $("#view-decks"),
 };
 
 function currentRoute() {
@@ -955,6 +1061,7 @@ function router() {
   else if (route === "card") { initCard(); $("#card-search")?.focus(); }
   else if (route === "analyze") initAnalyze();
   else if (route === "build") initBuild();
+  else if (route === "decks") loadDecks();
 
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
 }

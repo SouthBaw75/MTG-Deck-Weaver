@@ -38,6 +38,7 @@
       <a class="nav__link" href="#card" data-route="card">Card Lookup</a>
       <a class="nav__link" href="#analyze" data-route="analyze">Analyze</a>
       <a class="nav__link" href="#build" data-route="build">Build</a>
+      <a class="nav__link" href="#decks" data-route="decks">My Decks</a>
     </nav>
 
     <button
@@ -205,6 +206,13 @@
       </div>
     </form>
     <div id="build-result" class="build-result" aria-live="polite"></div>
+  </section>
+
+  <!-- ---------- My Decks ---------- -->
+  <section id="view-decks" class="view" hidden>
+    <h1 class="view__title">My Decks</h1>
+    <p class="view__intro">Decks you save from Analyze or Build are kept locally on your machine.</p>
+    <div id="decks-list" aria-live="polite"></div>
   </section>
 
 </main>

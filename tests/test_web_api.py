@@ -42,7 +42,8 @@ def client(tmp_path):
     run_tagging(conn)
     conn.commit()
     conn.close()
-    return TestClient(create_app(str(db_path)))
+    # isolate the decks store per test
+    return TestClient(create_app(str(db_path), decks_db_path=str(tmp_path / "decks.db")))
 
 
 def test_stats(client):
@@ -151,3 +152,34 @@ def test_splash_routes(client):
     # both the landscape and mobile-portrait splash images are served
     assert client.get("/splash.png").status_code == 200
     assert client.get("/splash-portrait.png").status_code == 200
+
+
+def test_decks_crud(client):
+    # empty to start
+    assert client.get("/api/decks").json() == []
+    # save
+    r = client.post("/api/decks", json={
+        "name": "My Gruul", "commander": "Tovolar, Dire Overlord", "bracket": 3,
+        "decklist": "Commander\n1 Tovolar, Dire Overlord\nDeck\n1 Sol Ring\n2 Forest\n",
+    })
+    assert r.status_code == 200
+    did = r.json()["id"]
+    # list shows it with a computed card_count
+    lst = client.get("/api/decks").json()
+    assert len(lst) == 1 and lst[0]["name"] == "My Gruul"
+    assert lst[0]["card_count"] == 4  # 1 + 1 + 2
+    # get returns the full decklist
+    got = client.get(f"/api/decks/{did}").json()
+    assert "Tovolar" in got["decklist"]
+    # update in place (same id)
+    client.post("/api/decks", json={"id": did, "name": "My Gruul v2",
+                                    "decklist": "Commander\n1 Tovolar, Dire Overlord\nDeck\n1 Cultivate\n"})
+    assert len(client.get("/api/decks").json()) == 1
+    assert client.get(f"/api/decks/{did}").json()["name"] == "My Gruul v2"
+    # rename
+    client.put(f"/api/decks/{did}", json={"name": "Renamed"})
+    assert client.get(f"/api/decks/{did}").json()["name"] == "Renamed"
+    # delete
+    assert client.delete(f"/api/decks/{did}").status_code == 200
+    assert client.get("/api/decks").json() == []
+    assert client.get(f"/api/decks/{did}").status_code == 404

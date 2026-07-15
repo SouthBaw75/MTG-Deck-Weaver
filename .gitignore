@@ -1,6 +1,9 @@
 # Downloaded bulk data and the built database
 data/cache/
 
+# The user's saved-deck library (created at runtime, per-user)
+data/decks.db
+
 # Transient SQLite write-ahead-log sidecars (the committed demo .db is complete)
 *.db-wal
 *.db-shm

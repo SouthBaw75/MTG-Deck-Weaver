@@ -349,6 +349,32 @@ select.input { cursor: pointer; }
 .btn--primary[disabled], .btn[disabled] { opacity: 0.6; cursor: progress; }
 .btn--ghost { background: transparent; }
 .btn--small { padding: 0.4rem 0.9rem; font-size: 0.9rem; }
+.btn--danger { color: var(--danger, #d1503c); }
+.btn--danger:hover { border-color: var(--danger, #d1503c); }
+
+/* ---- Save deck bar ------------------------------------------------------- */
+.save-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.4rem 0 1rem; }
+.save-bar .btn { padding: 0.45rem 1rem; font-size: 0.92rem; }
+.save-bar__input { max-width: 320px; padding: 0.45rem 0.7rem; }
+.save-bar__done { color: var(--gold-bright); font-weight: 600; }
+
+/* ---- My Decks library ---------------------------------------------------- */
+.view__intro { color: var(--text-dim); margin: -0.4rem 0 1.2rem; }
+.deck-cards { display: flex; flex-direction: column; gap: 0.7rem; }
+.deck-card {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: linear-gradient(160deg, var(--surface), var(--bg-2));
+}
+.deck-card__main { flex: 1 1 240px; min-width: 0; }
+.deck-card__name { font-family: var(--font-display); font-size: 1.15rem; color: var(--text); }
+.deck-card__meta { color: var(--text-dim); font-size: 0.9rem; margin-top: 0.15rem; }
+.deck-card__actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.deck-card__actions .btn { padding: 0.4rem 0.9rem; font-size: 0.9rem; }
+@media (max-width: 640px) {
+  .deck-card__actions { width: 100%; }
+  .deck-card__actions .btn { flex: 1; }
+}
 
 .search { display: flex; gap: 0.8rem; align-items: flex-end; flex-wrap: wrap; }
 .search .field { flex: 1 1 320px; margin-bottom: 0; }
