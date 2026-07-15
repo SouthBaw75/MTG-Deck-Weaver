@@ -19,6 +19,7 @@ def make_card(
     tags: dict[str, float] | None = None,
     legal_commander: str = "legal",
     game_changer: bool = False,
+    price_usd: float | None = None,
 ) -> DeckCard:
     cv = CardView.from_dict(
         {
@@ -41,6 +42,7 @@ def make_card(
         color_identity=color_identity or [],
         legal_commander=legal_commander,
         is_game_changer=game_changer,
+        price_usd=price_usd,
     )
 
 

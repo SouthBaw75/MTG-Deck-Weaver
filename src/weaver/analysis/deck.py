@@ -106,6 +106,7 @@ class DeckCard:
     color_identity: list[str] = field(default_factory=list)
     legal_commander: str | None = None
     is_game_changer: bool = False
+    price_usd: float | None = None
 
     @property
     def resolved(self) -> bool:

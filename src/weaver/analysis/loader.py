@@ -62,6 +62,7 @@ def load_deck(conn: sqlite3.Connection, text: str) -> DeckView:
                 color_identity=json.loads(row["color_identity"]) if row["color_identity"] else [],
                 legal_commander=row["legal_commander"],
                 is_game_changer=bool(row["is_game_changer"]),
+                price_usd=row["price_usd"],
             )
         )
     deck = DeckView(cards=cards, unresolved=unresolved)
