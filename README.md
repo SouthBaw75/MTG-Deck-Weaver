@@ -21,7 +21,9 @@ recall with zero false-positive violations — **analyzes whole decklists** acro
 angles (legality & bracket floor, mana base, role coverage, hypergeometric
 consistency, combo detection, defense/weakness), and **builds tuned decks**: give it
 a commander and a bracket and it constructs a legal 100-card singleton deck around
-the commander's archetype, then self-validates it through the analyzer.
+the commander's archetype, then self-validates it through the analyzer. A local
+**web app** (`weaver serve`) puts a browser UI on all of it, with the splash art
+as the front door.
 
 ### Quickstart
 
@@ -35,7 +37,15 @@ weaver tags ramp.rock        # best cards for a role; `weaver tags` lists the ta
 weaver analyze mydeck.txt    # full deck report: legality, bracket, mana base, role coverage
 weaver build --commander "Meren of Clan Nel Toth" --bracket 3 --budget 300 --out deck.txt
                              # build a tuned deck, then self-validate it
+weaver serve                 # launch the web app at http://127.0.0.1:8000
 weaver stats                 # knowledge base row counts and freshness
+```
+
+The web app (`pip install -e ".[web]"` then `weaver serve`) wraps everything in a
+browser UI: card lookup, deck analysis with charts, and the deck builder — the
+splash screen is the front door.
+
+```bash
 pytest                       # offline test suite (500+ tests, no network needed)
 ```
 
