@@ -369,6 +369,49 @@ select.input { cursor: pointer; }
 @media (max-width: 560px) {
   .card-image { float: none; display: block; width: 60%; max-width: 240px; margin: 0 auto 1rem; }
 }
+/* Clickable card names -> open the card popup */
+.card-link {
+  background: none; border: none; padding: 0; margin: 0; font: inherit; cursor: pointer;
+  color: var(--gold); text-align: left; text-decoration: none;
+  border-bottom: 1px dotted color-mix(in srgb, var(--gold) 55%, transparent);
+  transition: color .12s ease, border-color .12s ease;
+}
+.card-link:hover, .card-link:focus-visible { color: var(--text); border-bottom-color: var(--gold); outline: none; }
+.card-link:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 45%, transparent); border-radius: 2px; }
+.card-link--heading { font: inherit; color: inherit; border-bottom-color: transparent; }
+.card-link--heading:hover, .card-link--heading:focus-visible { color: var(--gold); border-bottom-color: var(--gold); }
+.card-chip-row { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .3rem; }
+.card-chip {
+  border: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  border-radius: 999px; padding: .15rem .6rem; font-size: .85rem; background: var(--bg-2);
+}
+.card-chip:hover, .card-chip:focus-visible { border-color: var(--gold); }
+.section-sublabel { color: var(--text-dim); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; margin: 1rem 0 .2rem; }
+
+/* Card popup modal */
+body.modal-open { overflow: hidden; }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-start; justify-content: center;
+  padding: 4vh 1rem; overflow-y: auto;
+  background: rgba(0, 0, 0, 0.66); backdrop-filter: blur(3px);
+}
+.modal-overlay[hidden] { display: none; }
+.modal {
+  position: relative; width: min(620px, 100%); background: var(--bg-1);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 24px 70px rgba(0,0,0,.55);
+  animation: modal-in .16s ease-out;
+}
+@keyframes modal-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .modal { animation: none; } }
+.modal__body { padding: .4rem; }
+.modal__body .panel { margin-top: 0; border: none; box-shadow: none; background: transparent; }
+.modal__close {
+  position: absolute; top: .5rem; right: .5rem; z-index: 1;
+  width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font-size: 1.3rem; line-height: 1; cursor: pointer;
+}
+.modal__close:hover, .modal__close:focus-visible { border-color: var(--gold); color: var(--gold); outline: none; }
+
 .card-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
 .card-name { font-size: 1.6rem; margin: 0; color: var(--text); }
 .card-cost { font-family: ui-monospace, Menlo, monospace; color: var(--gold); font-size: 1.05rem; white-space: nowrap; }

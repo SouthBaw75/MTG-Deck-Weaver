@@ -97,6 +97,85 @@ function clearToast() {
   toastEl.hidden = true;
 }
 
+/* ---------- Card popup (global) ------------------------------------------
+   Any element with class "card-link" and a data-card="<name>" attribute opens
+   a modal showing that card's image + full details. Rendering is delegated at
+   the document level, so every card name anywhere in the app is clickable
+   without wiring each render site to a handler. */
+
+/** An inline, clickable card name that opens the card popup. */
+function cardLink(name, extraClass) {
+  return el("button", {
+    type: "button",
+    class: "card-link" + (extraClass ? " " + extraClass : ""),
+    "data-card": name,
+    title: `View ${name}`,
+    text: name,
+  });
+}
+
+let _modal = null;
+let _modalReturnFocus = null;
+
+function ensureModal() {
+  if (_modal) return _modal;
+  const body = el("div", { class: "modal__body" });
+  const closeBtn = el("button", {
+    type: "button", class: "modal__close", "aria-label": "Close", html: "&times;",
+    onclick: closeCardModal,
+  });
+  const dialog = el("div", {
+    class: "modal", role: "dialog", "aria-modal": "true", "aria-label": "Card details",
+  }, [closeBtn, body]);
+  const overlay = el("div", {
+    class: "modal-overlay", hidden: "",
+    onclick: (e) => { if (e.target === overlay) closeCardModal(); },
+  }, [dialog]);
+  document.body.append(overlay);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.hidden) closeCardModal();
+  });
+  _modal = { overlay, dialog, body, closeBtn };
+  return _modal;
+}
+
+async function openCardModal(name) {
+  const { overlay, body, closeBtn } = ensureModal();
+  _modalReturnFocus = document.activeElement;
+  body.innerHTML = "";
+  body.append(loadingNode("Summoning card…"));
+  overlay.hidden = false;
+  document.body.classList.add("modal-open");
+  closeBtn.focus();
+  try {
+    const card = await api(`/api/card/${encodeURIComponent(name)}`);
+    body.innerHTML = "";
+    body.append(renderCard(card));
+  } catch (err) {
+    body.innerHTML = "";
+    const msg = err.status === 404
+      ? `No card data for “${name}”. If you're on the demo database it only has 68 cards — run \`weaver update\` for the full set.`
+      : err.message;
+    body.append(el("div", { class: "banner", text: msg }));
+  }
+}
+
+function closeCardModal() {
+  if (!_modal || _modal.overlay.hidden) return;
+  _modal.overlay.hidden = true;
+  document.body.classList.remove("modal-open");
+  if (_modalReturnFocus && _modalReturnFocus.focus) _modalReturnFocus.focus();
+}
+
+// One document-level listener catches every card-link click in the app.
+document.addEventListener("click", (e) => {
+  const link = e.target.closest(".card-link[data-card]");
+  if (link) {
+    e.preventDefault();
+    openCardModal(link.getAttribute("data-card"));
+  }
+});
+
 /* ---------- Theme ---------------------------------------------------------- */
 const THEME_KEY = "weaver.theme";
 const themeBtn = $("#theme-toggle");
@@ -380,8 +459,13 @@ function renderAnalysis(a) {
   head.append(el("p", { class: "meta", html:
     `<strong>${fmtNum(a.total_cards)}</strong> cards &middot; <strong>${fmtNum(a.land_count)}</strong> lands` }));
   if (a.unresolved && a.unresolved.length) {
-    head.append(el("div", { class: "banner banner--empty", style: "margin-top:.8rem",
-      text: `Unresolved (${a.unresolved.length}): ${a.unresolved.join(", ")}` }));
+    const banner = el("div", { class: "banner banner--empty", style: "margin-top:.8rem" },
+      [document.createTextNode(`Unresolved (${a.unresolved.length}): `)]);
+    a.unresolved.forEach((n, i) => {
+      if (i) banner.append(document.createTextNode(", "));
+      banner.append(cardLink(n));
+    });
+    head.append(banner);
   }
   frag.append(head);
 
@@ -412,8 +496,40 @@ function renderSection(section) {
   if (section.title === "Mana Base") appendManaCharts(node, data);
   else if (section.title === "Role Coverage") appendRoleChart(node, data);
   else if (section.title === "Consistency") appendConsistencyChart(node, data);
+  else if (section.title === "Combos & Win Lines") appendComboCards(node, data);
+  else if (section.title === "Synergy") appendSynergyCards(node, data);
 
   return node;
+}
+
+/** Clickable card chips for every card named in the combos section. */
+function appendComboCards(node, data) {
+  const names = new Set();
+  for (const c of (data.present || [])) (c.cards || []).forEach((n) => names.add(n));
+  for (const c of (data.near_miss || [])) {
+    (c.cards || []).forEach((n) => names.add(n));
+    (c.missing || []).forEach((n) => names.add(n));
+  }
+  appendCardChipRow(node, names);
+}
+
+/** Clickable card chips for every card named in the synergy section. */
+function appendSynergyCards(node, data) {
+  const names = new Set();
+  for (const pair of [...(data.top_pairs || []), ...(data.nonbos || [])]) {
+    if (pair[0]) names.add(pair[0]);
+    if (pair[1]) names.add(pair[1]);
+  }
+  Object.keys(data.per_card || {}).forEach((n) => names.add(n));
+  appendCardChipRow(node, names);
+}
+
+function appendCardChipRow(node, names) {
+  if (!names || !names.size) return;
+  const row = el("div", { class: "card-chip-row" });
+  [...names].sort().forEach((n) => row.append(cardLink(n, "card-chip")));
+  node.append(el("div", { class: "section-sublabel", text: "Cards mentioned" }));
+  node.append(row);
 }
 
 /* ---------- Chart builders ------------------------------------------------ */
@@ -625,8 +741,12 @@ function renderDossier(d) {
 
   // ---- Header ----
   const head = el("div", { class: "build-head" });
-  const title = d.partner ? `${d.commander}  +  ${d.partner}` : d.commander;
-  head.append(el("h2", { text: title }));
+  const titleH = el("h2", { class: "build-title" }, [cardLink(d.commander, "card-link--heading")]);
+  if (d.partner) {
+    titleH.append(document.createTextNode("  +  "));
+    titleH.append(cardLink(d.partner, "card-link--heading"));
+  }
+  head.append(titleH);
 
   const stats = el("div", { class: "build-stats" });
   stats.append(el("span", { html: `Bracket <strong>${esc(d.bracket)}</strong>` }));
@@ -659,7 +779,7 @@ function renderDossier(d) {
       list.append(
         el("li", {}, [
           el("div", {}, [
-            el("span", { class: "cl-name", text: card.name }),
+            cardLink(card.name, "cl-name"),
             card.reason ? el("div", { class: "cl-reason", text: card.reason }) : null,
           ]),
           el("span", { class: "cl-price", text: price || "—" }),
@@ -679,7 +799,10 @@ function renderDossier(d) {
     ]));
     const pills = el("div", { class: "manabase-list" });
     for (const land of d.lands) {
-      pills.append(el("span", { class: "mana-pill", html: `<b>${esc(land.quantity)}×</b> ${esc(land.name)}` }));
+      pills.append(el("span", { class: "mana-pill" }, [
+        el("b", { text: `${land.quantity}× ` }),
+        cardLink(land.name),
+      ]));
     }
     g.append(pills);
     frag.append(g);
