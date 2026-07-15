@@ -152,6 +152,16 @@ def create_app(db_path: str | None = None) -> FastAPI:
             raise HTTPException(404, "splash not found")
         return FileResponse(p)
 
+    @app.get("/splash-portrait.png")
+    def splash_portrait():
+        p = repo_root() / "assets" / "splash-portrait.png"
+        if not p.exists():
+            # Fall back to the landscape art if the portrait isn't present.
+            p = repo_root() / "assets" / "splash.png"
+        if not p.exists():
+            raise HTTPException(404, "splash not found")
+        return FileResponse(p)
+
     if STATIC_DIR.exists():
         app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 

@@ -145,3 +145,9 @@ def test_build_unknown_commander_404(client):
 def test_archetypes_endpoint(client):
     arch = client.get("/api/archetypes").json()
     assert any(a["key"] == "aristocrats" for a in arch)
+
+
+def test_splash_routes(client):
+    # both the landscape and mobile-portrait splash images are served
+    assert client.get("/splash.png").status_code == 200
+    assert client.get("/splash-portrait.png").status_code == 200

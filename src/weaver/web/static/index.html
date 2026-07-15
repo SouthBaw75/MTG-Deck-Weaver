@@ -22,7 +22,18 @@
       <span class="brand__name">Deck Weaver</span>
     </a>
 
-    <nav class="nav" aria-label="Primary">
+    <button
+      id="nav-toggle"
+      class="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="primary-nav"
+      aria-label="Menu"
+    >
+      <span class="nav-toggle__bars" aria-hidden="true"></span>
+    </button>
+
+    <nav id="primary-nav" class="nav" aria-label="Primary">
       <a class="nav__link" href="#home" data-route="home">Home</a>
       <a class="nav__link" href="#card" data-route="card">Card Lookup</a>
       <a class="nav__link" href="#analyze" data-route="analyze">Analyze</a>
@@ -52,7 +63,10 @@
   <section id="view-home" class="view" hidden>
     <div class="hero">
       <div class="hero__art">
-        <img src="/splash.png" alt="A hooded Weaver at a golden loom, threading glowing spell cards into a deck" />
+        <picture>
+          <source media="(max-width: 640px)" srcset="/splash-portrait.png" />
+          <img src="/splash.png" alt="A hooded Weaver at a golden loom, threading glowing spell cards into a deck" />
+        </picture>
         <div class="hero__scrim" aria-hidden="true"></div>
       </div>
       <div class="hero__copy">

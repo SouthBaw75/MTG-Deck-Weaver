@@ -901,6 +901,32 @@ function router() {
 
 window.addEventListener("hashchange", router);
 
+/* ---------- Mobile hamburger nav ------------------------------------------ */
+const navToggle = $("#nav-toggle");
+const primaryNav = $("#primary-nav");
+function closeNav() {
+  if (!primaryNav) return;
+  primaryNav.classList.remove("nav--open");
+  navToggle?.setAttribute("aria-expanded", "false");
+}
+if (navToggle && primaryNav) {
+  navToggle.addEventListener("click", () => {
+    const open = primaryNav.classList.toggle("nav--open");
+    navToggle.setAttribute("aria-expanded", String(open));
+  });
+  // Choosing a destination closes the menu.
+  primaryNav.addEventListener("click", (e) => {
+    if (e.target.closest(".nav__link")) closeNav();
+  });
+  // Escape closes and returns focus to the toggle.
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && primaryNav.classList.contains("nav--open")) {
+      closeNav();
+      navToggle.focus();
+    }
+  });
+}
+
 /* ---------- Boot ---------------------------------------------------------- */
 initTheme();
 if (!location.hash) location.hash = "#home";
