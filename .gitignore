@@ -1,6 +1,10 @@
 # Downloaded bulk data and the built database
 data/cache/
 
+# Transient SQLite write-ahead-log sidecars (the committed demo .db is complete)
+*.db-wal
+*.db-shm
+
 # Python
 __pycache__/
 *.py[cod]
