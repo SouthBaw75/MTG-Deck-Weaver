@@ -1,0 +1,71 @@
+{
+  "source": "Commander deckbuilding conventions, tuned per bracket",
+  "notes": "Per-bracket target SHAPE of a 100-card Commander deck. Role-group keys reuse role_benchmarks.json names/tags exactly so the analyzer and builder agree. Slots sum (1 commander + nonland role slots + synergy_flex + lands) targets 100 for every bracket. Lower brackets run more lands, less interaction/tutoring, and a wider synergy_flex; higher brackets run leaner mana with denser card advantage, removal, disruption, protection, and wincons.",
+  "templates": {
+    "1": {
+      "land_count": 40,
+      "roles": {
+        "ramp": 9,
+        "card_advantage": 8,
+        "spot_removal": 5,
+        "board_wipe": 2,
+        "targeted_disruption": 0,
+        "protection": 1,
+        "wincon": 2
+      },
+      "synergy_flex": 32
+    },
+    "2": {
+      "land_count": 38,
+      "roles": {
+        "ramp": 10,
+        "card_advantage": 9,
+        "spot_removal": 6,
+        "board_wipe": 2,
+        "targeted_disruption": 1,
+        "protection": 2,
+        "wincon": 2
+      },
+      "synergy_flex": 29
+    },
+    "3": {
+      "land_count": 37,
+      "roles": {
+        "ramp": 11,
+        "card_advantage": 10,
+        "spot_removal": 8,
+        "board_wipe": 3,
+        "targeted_disruption": 2,
+        "protection": 2,
+        "wincon": 3
+      },
+      "synergy_flex": 23
+    },
+    "4": {
+      "land_count": 35,
+      "roles": {
+        "ramp": 12,
+        "card_advantage": 12,
+        "spot_removal": 10,
+        "board_wipe": 3,
+        "targeted_disruption": 4,
+        "protection": 3,
+        "wincon": 3
+      },
+      "synergy_flex": 17
+    },
+    "5": {
+      "land_count": 33,
+      "roles": {
+        "ramp": 13,
+        "card_advantage": 13,
+        "spot_removal": 9,
+        "board_wipe": 2,
+        "targeted_disruption": 6,
+        "protection": 4,
+        "wincon": 3
+      },
+      "synergy_flex": 16
+    }
+  }
+}

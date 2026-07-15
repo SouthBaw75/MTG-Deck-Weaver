@@ -210,6 +210,63 @@ def tags(ctx: click.Context, tag_name: str | None, top_n: int):
 
 
 @cli.command()
+@click.option("--commander", required=True, help="Commander name")
+@click.option("--partner", default=None, help="Partner/background/second commander")
+@click.option("--bracket", default=3, type=click.IntRange(1, 5), help="Target power bracket (1-5)")
+@click.option("--budget", default=None, type=float, help="Total USD budget cap")
+@click.option("--theme", default=None, help="Force an archetype (e.g. aristocrats)")
+@click.option("--own", "owned", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="Restrict to cards in this collection file")
+@click.option("--out", "out_path", default=None, type=click.Path(dir_okay=False),
+              help="Write the built decklist to this file")
+@click.option("--validate/--no-validate", default=True, help="Run the analyzer on the built deck")
+@click.pass_context
+def build(ctx: click.Context, commander, partner, bracket, budget, theme, owned, out_path, validate):
+    """Build a tuned Commander deck around a commander."""
+    from weaver.build.builder import build_deck
+    from weaver.build.dossier import render_dossier
+    from weaver.build.types import BuildRequest
+
+    conn = _open_db(ctx.obj["db_path"])
+    if conn.execute("SELECT COUNT(*) FROM cards").fetchone()[0] == 0:
+        console.print("[red]Knowledge base is empty.[/red] Run `weaver update` first.")
+        raise SystemExit(1)
+
+    owned_set = None
+    if owned:
+        from weaver.analysis.deck import parse_decklist
+        with open(owned, encoding="utf-8") as fh:
+            owned_set = {e.name for e in parse_decklist(fh.read())}
+
+    request = BuildRequest(
+        commander=commander, partner=partner, bracket=bracket,
+        budget=budget, theme=theme, owned=owned_set,
+    )
+    try:
+        result = build_deck(conn, request)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise SystemExit(1)
+
+    render_dossier(console, result)
+
+    decklist = result.to_decklist()
+    if out_path:
+        with open(out_path, "w", encoding="utf-8") as fh:
+            fh.write(decklist + "\n")
+        console.print(f"\n[green]decklist written to {out_path}[/green]")
+
+    if validate:
+        from weaver.analysis.engine import analyze_deck
+        from weaver.analysis.loader import load_deck
+        from weaver.analysis.report import render_report
+
+        console.print("\n[bold]— validation (analyzing the built deck) —[/bold]\n")
+        deck = load_deck(conn, decklist)
+        render_report(console, deck, analyze_deck(deck))
+
+
+@cli.command()
 @click.argument("decklist", type=click.Path(exists=True, dir_okay=False))
 @click.pass_context
 def analyze(ctx: click.Context, decklist: str):

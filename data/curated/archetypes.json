@@ -1,0 +1,321 @@
+{
+  "source": "MTG Deck Weaver curated archetype set (KNOWLEDGE_MODEL.md Layer 3 seed list)",
+  "updated": "2026-07-15",
+  "archetypes": [
+    {
+      "key": "aristocrats",
+      "name": "Aristocrats",
+      "description": "Sacrifice your own creatures for value and drain opponents as they die.",
+      "signal_tags": ["sac-outlet", "death-payoff", "token-producer", "recursion", "treasure-producer"],
+      "commander_text": [
+        "whenever a creature you control dies",
+        "whenever another creature you control dies",
+        "whenever a creature dies",
+        "sacrifice a creature",
+        "sacrifice another creature",
+        "each opponent loses"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["death-payoff"],
+      "core_roles_bias": {"token-producer": 1.5, "sac-outlet": 1.4, "death-payoff": 1.4, "recursion": 1.2}
+    },
+    {
+      "key": "tokens",
+      "name": "Tokens / Go-Wide",
+      "description": "Flood the board with creature tokens, then finish with anthems and evasion.",
+      "signal_tags": ["token-producer", "buff.anthem", "evasion-granting", "wincon.combat", "treasure-producer"],
+      "commander_text": [
+        "create a",
+        "creature token",
+        "creature tokens",
+        "populate",
+        "for each creature you control",
+        "creatures you control get +"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["token-producer", "buff.anthem"],
+      "core_roles_bias": {"token-producer": 1.6, "buff.anthem": 1.4, "evasion-granting": 1.3, "wincon.combat": 1.2}
+    },
+    {
+      "key": "voltron",
+      "name": "Voltron",
+      "description": "Load a single creature (often the commander) with Auras and Equipment and win with commander damage.",
+      "signal_tags": ["protection.self", "evasion-granting", "buff.anthem", "haste-granting", "wincon.combat"],
+      "commander_text": [
+        "gets +1/+1 for each",
+        "gets +x/+x",
+        "aura",
+        "auras",
+        "equipment",
+        "equipped",
+        "attached to",
+        "attach",
+        "combat damage to a player"
+      ],
+      "commander_keywords": ["double strike", "trample", "hexproof"],
+      "payoff_tags": ["wincon.combat"],
+      "core_roles_bias": {"protection.self": 1.6, "evasion-granting": 1.4, "buff.anthem": 1.2, "haste-granting": 1.2}
+    },
+    {
+      "key": "spellslinger",
+      "name": "Spellslinger",
+      "description": "Cast a high density of instants and sorceries and cash in the triggers.",
+      "signal_tags": ["spellslinger-payoff", "copy-effect", "draw.engine", "burn", "impulse-draw"],
+      "commander_text": [
+        "whenever you cast an instant or sorcery",
+        "instant or sorcery",
+        "noncreature spell",
+        "whenever you cast your",
+        "prowess",
+        "magecraft"
+      ],
+      "commander_keywords": ["prowess"],
+      "payoff_tags": ["spellslinger-payoff"],
+      "core_roles_bias": {"spellslinger-payoff": 1.6, "copy-effect": 1.3, "draw.engine": 1.2, "burn": 1.2}
+    },
+    {
+      "key": "landfall",
+      "name": "Landfall / Lands-Matter",
+      "description": "Trigger repeatable payoffs by putting extra lands onto the battlefield.",
+      "signal_tags": ["landfall-payoff", "ramp.land", "token-producer", "recursion"],
+      "commander_text": [
+        "landfall",
+        "whenever a land enters",
+        "whenever a land you control enters",
+        "land enters the battlefield under your control",
+        "play an additional land",
+        "additional lands"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["landfall-payoff"],
+      "core_roles_bias": {"landfall-payoff": 1.6, "ramp.land": 1.5, "token-producer": 1.2}
+    },
+    {
+      "key": "reanimator",
+      "name": "Reanimator / Graveyard",
+      "description": "Stock the graveyard, then cheat big threats back onto the battlefield.",
+      "signal_tags": ["recursion", "cheat-into-play", "graveyard-fill", "discard-payoff", "tutor.narrow"],
+      "commander_text": [
+        "return target creature card from your graveyard",
+        "from your graveyard to the battlefield",
+        "return it to the battlefield",
+        "put target creature card",
+        "from a graveyard onto the battlefield",
+        "mill"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["cheat-into-play", "recursion"],
+      "core_roles_bias": {"cheat-into-play": 1.6, "recursion": 1.5, "graveyard-fill": 1.4, "discard-payoff": 1.2}
+    },
+    {
+      "key": "blink",
+      "name": "Blink / Flicker",
+      "description": "Exile and return your own permanents to re-trigger enter-the-battlefield abilities.",
+      "signal_tags": ["blink", "token-producer", "recursion"],
+      "commander_text": [
+        "exile any number of other target creatures you control",
+        "exile target creature you control",
+        "exile up to one target creature",
+        "then return",
+        "return them to the battlefield",
+        "return it to the battlefield under your control",
+        "whenever ~ enters"
+      ],
+      "commander_keywords": ["flash"],
+      "payoff_tags": ["blink"],
+      "core_roles_bias": {"blink": 1.6, "token-producer": 1.2, "recursion": 1.2}
+    },
+    {
+      "key": "counters",
+      "name": "+1/+1 Counters",
+      "description": "Grow the board with +1/+1 counters and reward stacking them.",
+      "signal_tags": ["counters-matter", "buff.anthem", "token-producer"],
+      "commander_text": [
+        "+1/+1 counter",
+        "put a +1/+1 counter",
+        "put x +1/+1 counters",
+        "with a +1/+1 counter",
+        "for each +1/+1 counter",
+        "one or more counters",
+        "proliferate"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["counters-matter"],
+      "core_roles_bias": {"counters-matter": 1.7, "buff.anthem": 1.2}
+    },
+    {
+      "key": "artifacts",
+      "name": "Artifacts-Matter",
+      "description": "Leverage a critical mass of artifacts for ramp, cost reduction, and payoffs.",
+      "signal_tags": ["treasure-producer", "ramp.rock", "cost-reduction", "wincon.combo-piece"],
+      "commander_text": [
+        "whenever you cast an artifact",
+        "whenever an artifact enters",
+        "artifacts you control",
+        "artifact creature",
+        "metalcraft",
+        "affinity",
+        "treasure"
+      ],
+      "commander_keywords": ["affinity"],
+      "payoff_tags": ["treasure-producer"],
+      "core_roles_bias": {"treasure-producer": 1.5, "ramp.rock": 1.4, "cost-reduction": 1.3}
+    },
+    {
+      "key": "enchantress",
+      "name": "Enchantress",
+      "description": "Turn a wall of enchantments into a card-drawing value engine.",
+      "signal_tags": ["draw.engine", "recursion", "buff.anthem"],
+      "commander_text": [
+        "whenever you cast an enchantment",
+        "whenever an enchantment you control enters",
+        "enchantment spell",
+        "enchantments you control",
+        "constellation",
+        "aura"
+      ],
+      "commander_keywords": ["constellation"],
+      "payoff_tags": ["draw.engine"],
+      "core_roles_bias": {"draw.engine": 1.6, "recursion": 1.2}
+    },
+    {
+      "key": "tribal",
+      "name": "Tribal / Typal",
+      "description": "Build around a shared creature type with anthems and type-specific payoffs.",
+      "signal_tags": ["buff.anthem", "token-producer", "evasion-granting"],
+      "commander_text": [
+        "other creatures you control get",
+        "creatures you control of the",
+        "share a creature type",
+        "creatures you control get +1/+1",
+        "creatures of the creature type",
+        "a creature type of your choice"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["buff.anthem"],
+      "core_roles_bias": {"buff.anthem": 1.5, "token-producer": 1.3, "evasion-granting": 1.2}
+    },
+    {
+      "key": "group-hug",
+      "name": "Group Hug / Politics",
+      "description": "Hand out resources and steer the table to control the game politically.",
+      "signal_tags": ["draw.engine", "theft", "taxing", "deterrent"],
+      "commander_text": [
+        "each player draws",
+        "each player may",
+        "target player draws",
+        "each opponent draws",
+        "vote",
+        "goad",
+        "the monarch"
+      ],
+      "commander_keywords": ["monarch"],
+      "payoff_tags": ["draw.engine"],
+      "core_roles_bias": {"draw.engine": 1.4, "theft": 1.3, "taxing": 1.2}
+    },
+    {
+      "key": "stax",
+      "name": "Stax / Control",
+      "description": "Deny opponents resources and lock the board while you win at leisure.",
+      "signal_tags": ["stax", "taxing", "pillow-fort", "deterrent", "wipe.any"],
+      "commander_text": [
+        "don't untap",
+        "can't untap",
+        "spells cost {",
+        "cost {1} more to cast",
+        "players can't",
+        "each opponent",
+        "an additional cost"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["stax"],
+      "core_roles_bias": {"stax": 1.6, "taxing": 1.4, "pillow-fort": 1.3, "deterrent": 1.2}
+    },
+    {
+      "key": "combo",
+      "name": "Combo",
+      "description": "Assemble a two- or three-card engine that ends the game in one turn.",
+      "signal_tags": ["wincon.combo-piece", "tutor.broad", "untapper", "copy-effect", "cheat-into-play"],
+      "commander_text": [
+        "untap target",
+        "without paying its mana cost",
+        "you may cast",
+        "copy that spell",
+        "whenever you cast",
+        "search your library for a card"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["wincon.combo-piece"],
+      "core_roles_bias": {"wincon.combo-piece": 1.6, "tutor.broad": 1.4, "untapper": 1.3, "copy-effect": 1.3}
+    },
+    {
+      "key": "big-mana",
+      "name": "Big Mana / Stompy",
+      "description": "Ramp hard into oversized threats and beat down.",
+      "signal_tags": ["ramp.land", "ramp.rock", "ramp.dork", "cost-reduction", "wincon.combat"],
+      "commander_text": [
+        "add {",
+        "double",
+        "whenever you tap a",
+        "power 4 or greater",
+        "power 5 or greater",
+        "greatest power",
+        "trample"
+      ],
+      "commander_keywords": ["trample"],
+      "payoff_tags": ["wincon.combat"],
+      "core_roles_bias": {"ramp.land": 1.4, "ramp.rock": 1.3, "ramp.dork": 1.3, "wincon.combat": 1.3}
+    },
+    {
+      "key": "lifegain",
+      "name": "Lifegain",
+      "description": "Gain life repeatedly and convert your life total into card advantage and damage.",
+      "signal_tags": ["lifegain", "death-payoff", "draw.engine"],
+      "commander_text": [
+        "whenever you gain life",
+        "gain life",
+        "gain that much life",
+        "lifelink",
+        "your life total",
+        "if you gained life"
+      ],
+      "commander_keywords": ["lifelink"],
+      "payoff_tags": ["lifegain"],
+      "core_roles_bias": {"lifegain": 1.6, "draw.engine": 1.2}
+    },
+    {
+      "key": "mill",
+      "name": "Mill",
+      "description": "Grind opponents' libraries to zero as an alternate win condition.",
+      "signal_tags": ["graveyard-fill", "wincon.alt", "graveyard-hate"],
+      "commander_text": [
+        "mills",
+        "each opponent mills",
+        "puts the top",
+        "into their graveyard",
+        "cards from the top of their library",
+        "from the top of that player's library"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["wincon.alt"],
+      "core_roles_bias": {"graveyard-fill": 1.5, "wincon.alt": 1.4}
+    },
+    {
+      "key": "superfriends",
+      "name": "Superfriends",
+      "description": "Deploy and protect a suite of planeswalkers, powered by proliferate.",
+      "signal_tags": ["counters-matter", "token-producer", "protection.board", "pillow-fort"],
+      "commander_text": [
+        "planeswalker",
+        "planeswalkers you control",
+        "loyalty counter",
+        "loyalty counters",
+        "proliferate",
+        "activate a loyalty ability"
+      ],
+      "commander_keywords": [],
+      "payoff_tags": ["counters-matter"],
+      "core_roles_bias": {"counters-matter": 1.4, "token-producer": 1.3, "protection.board": 1.3}
+    }
+  ]
+}

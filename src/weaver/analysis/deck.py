@@ -31,6 +31,11 @@ _QTY = re.compile(r"^\s*(\d+)\s*[xX]?\s+(.*)$")
 _ANNOT = re.compile(r"\s*(\([^)]*\)\s*[\w-]*|\[[^\]]*\]|<[^>]*>)\s*$")
 _CMDR_MARK = re.compile(r"\*\s*(cmdr|commander)\s*\*", re.IGNORECASE)
 
+_BASIC_LAND_NAMES = frozenset(
+    ["Plains", "Island", "Swamp", "Mountain", "Forest", "Wastes"]
+    + [f"Snow-Covered {b}" for b in ("Plains", "Island", "Swamp", "Mountain", "Forest")]
+)
+
 _IGNORE_SECTIONS = {"sideboard", "maybeboard", "considering", "tokens", "maybe"}
 _COMMANDER_SECTIONS = {"commander", "commanders", "command zone"}
 _DECK_SECTIONS = {"deck", "mainboard", "main", "commanderdeck"}
@@ -108,10 +113,19 @@ class DeckCard:
 
     @property
     def is_land(self) -> bool:
-        return self.card.is_land if self.card else "land" in self.type_line.lower()
+        if self.card:
+            return self.card.is_land
+        if "land" in self.type_line.lower():
+            return True
+        return self.name in _BASIC_LAND_NAMES
 
     @property
     def is_basic_land(self) -> bool:
+        # Canonical basics are recognized by name too, so an unresolved
+        # "Forest" (e.g. a DB missing basics) is still treated as a basic and
+        # exempt from the singleton rule.
+        if self.name in _BASIC_LAND_NAMES:
+            return True
         return self.is_land and "basic" in self.type_line.lower()
 
 
