@@ -13,17 +13,19 @@ Deck Weaver's goal is to be a **master of MTG rules and play mechanics** that ca
 
 ## Project Status
 
-**Phases 0–2 and the Phase 4 deck builder are built.** The `weaver` CLI downloads
-all public data sources into a local SQLite knowledge base, answers card and rules
-lookups, tags every card with its strategic roles (ramp, draw, removal, wincon, ...)
-scored by quality — validated against a hand-labeled 348-card golden corpus at 100%
-recall with zero false-positive violations — **analyzes whole decklists** across six
-angles (legality & bracket floor, mana base, role coverage, hypergeometric
-consistency, combo detection, defense/weakness), and **builds tuned decks**: give it
-a commander and a bracket and it constructs a legal 100-card singleton deck around
-the commander's archetype, then self-validates it through the analyzer. A local
-**web app** (`weaver serve`) puts a browser UI on all of it, with the splash art
-as the front door.
+**All planned phases are built (0–5).** The `weaver` CLI downloads all public data
+sources into a local SQLite knowledge base, answers card and rules lookups, tags
+every card with its strategic roles (ramp, draw, removal, wincon, ...) scored by
+quality — validated against a hand-labeled 348-card golden corpus at 100% recall
+with zero false-positive violations — reasons about how mechanics interact via a
+150-edge **synergy graph**, **analyzes whole decklists** across seven angles
+(legality & bracket floor, mana base, role coverage, synergy density,
+hypergeometric consistency, combo detection, defense/weakness), and **builds tuned
+decks**: give it a commander and a bracket and it constructs a legal 100-card
+singleton deck around the commander's archetype — choosing cards that actually
+interact — then self-validates it through the analyzer. A local **web app**
+(`weaver serve`) puts a browser UI on all of it, with the splash art as the front
+door.
 
 ### Quickstart
 
@@ -34,7 +36,8 @@ weaver card "Rhystic Study"  # card lookup: oracle text, legality, roles, Game C
 weaver rule 702.2            # Comprehensive Rules lookup (or full-text: weaver rule deathtouch)
 weaver tag                   # (re)run the role-tagging engine over all cards
 weaver tags ramp.rock        # best cards for a role; `weaver tags` lists the taxonomy
-weaver analyze mydeck.txt    # full deck report: legality, bracket, mana base, role coverage
+weaver synergies "Blood Artist"  # cards that interact with a given card
+weaver analyze mydeck.txt    # full deck report: legality, bracket, mana base, synergy, ...
 weaver build --commander "Meren of Clan Nel Toth" --bracket 3 --budget 300 --out deck.txt
                              # build a tuned deck, then self-validate it
 weaver serve                 # launch the web app at http://127.0.0.1:8000
