@@ -1,0 +1,202 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<title>MTG Deck Weaver</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%A7%B5</text></svg>" />
+
+<!--
+  MTG Deck Weaver — single-page frontend (hash routed).
+  Vanilla HTML/CSS/JS, no build step, no external assets. Fully offline.
+  Views: #home #card #analyze #build. Logic lives in app.js.
+-->
+
+<!-- Skip link for keyboard users -->
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ===================== Top navigation ===================== -->
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#home" aria-label="MTG Deck Weaver home">
+      <span class="brand__glyph" aria-hidden="true">&#9741;</span>
+      <span class="brand__name">Deck Weaver</span>
+    </a>
+
+    <nav class="nav" aria-label="Primary">
+      <a class="nav__link" href="#home" data-route="home">Home</a>
+      <a class="nav__link" href="#card" data-route="card">Card Lookup</a>
+      <a class="nav__link" href="#analyze" data-route="analyze">Analyze</a>
+      <a class="nav__link" href="#build" data-route="build">Build</a>
+    </nav>
+
+    <button
+      id="theme-toggle"
+      class="theme-toggle"
+      type="button"
+      aria-pressed="false"
+      title="Toggle light / dark theme"
+    >
+      <span class="theme-toggle__icon" aria-hidden="true">&#9790;</span>
+      <span class="visually-hidden">Toggle theme</span>
+    </button>
+  </div>
+</header>
+
+<!-- Non-alarming error / notice banner (populated by app.js) -->
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<!-- ===================== Main routed content ===================== -->
+<main id="main" class="main">
+
+  <!-- ---------- Home ---------- -->
+  <section id="view-home" class="view" hidden>
+    <div class="hero">
+      <div class="hero__art">
+        <img src="/splash.png" alt="A hooded Weaver at a golden loom, threading glowing spell cards into a deck" />
+        <div class="hero__scrim" aria-hidden="true"></div>
+      </div>
+      <div class="hero__copy">
+        <h1 class="hero__title">MTG Deck Weaver</h1>
+        <p class="hero__tag">Thread a hundred cards into a deck that actually wins &mdash; analyzed, benchmarked, and built.</p>
+        <p id="home-stats" class="hero__stats" aria-live="polite"></p>
+        <div id="home-empty" class="banner banner--empty" hidden>
+          Knowledge base empty &mdash; run <code>weaver update</code> first.
+        </div>
+      </div>
+    </div>
+
+    <div class="entry-grid">
+      <a class="entry-card" href="#analyze">
+        <span class="entry-card__eyebrow">Diagnose</span>
+        <h2 class="entry-card__title">Analyze a deck</h2>
+        <p>Paste a decklist and get a mana-base, role-coverage and consistency read-out with charts.</p>
+        <span class="entry-card__go" aria-hidden="true">&rarr;</span>
+      </a>
+      <a class="entry-card" href="#build">
+        <span class="entry-card__eyebrow">Create</span>
+        <h2 class="entry-card__title">Build a deck</h2>
+        <p>Name a commander and a bracket; the Weaver assembles a full, validated 100-card list.</p>
+        <span class="entry-card__go" aria-hidden="true">&rarr;</span>
+      </a>
+      <a class="entry-card" href="#card">
+        <span class="entry-card__eyebrow">Inspect</span>
+        <h2 class="entry-card__title">Card lookup</h2>
+        <p>Search any card and see its roles, legality, price, EDHREC rank and combos.</p>
+        <span class="entry-card__go" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ---------- Card lookup ---------- -->
+  <section id="view-card" class="view" hidden>
+    <h1 class="view__title">Card Lookup</h1>
+    <form id="card-form" class="search" role="search" autocomplete="off">
+      <label class="field">
+        <span class="field__label">Card name</span>
+        <div class="combo">
+          <input
+            id="card-search"
+            class="input"
+            type="text"
+            name="q"
+            placeholder="e.g. Sol Ring"
+            aria-label="Card name"
+            aria-expanded="false"
+            aria-controls="card-suggest"
+            aria-autocomplete="list"
+            role="combobox"
+          />
+          <ul id="card-suggest" class="suggest" role="listbox" hidden></ul>
+        </div>
+      </label>
+      <button class="btn btn--primary" type="submit">Look up</button>
+    </form>
+    <div id="card-result" class="card-result" aria-live="polite"></div>
+  </section>
+
+  <!-- ---------- Analyze ---------- -->
+  <section id="view-analyze" class="view" hidden>
+    <h1 class="view__title">Analyze a Deck</h1>
+    <form id="analyze-form">
+      <label class="field">
+        <span class="field__label">Decklist</span>
+        <span class="field__hint">Paste a Moxfield / Archidekt text export &mdash; one card per line, e.g. <code>1 Sol Ring</code>.</span>
+        <textarea
+          id="analyze-input"
+          class="textarea"
+          rows="12"
+          placeholder="Commander&#10;1 Tovolar, Dire Overlord&#10;&#10;Deck&#10;1 Sol Ring&#10;1 Lightning Bolt&#10;36 Forest"
+        ></textarea>
+      </label>
+      <div class="form-actions">
+        <button id="analyze-btn" class="btn btn--primary" type="submit">Analyze</button>
+      </div>
+    </form>
+    <div id="analyze-result" class="analysis" aria-live="polite"></div>
+  </section>
+
+  <!-- ---------- Build ---------- -->
+  <section id="view-build" class="view" hidden>
+    <h1 class="view__title">Build a Deck</h1>
+    <form id="build-form" class="build-form" autocomplete="off">
+      <div class="build-form__grid">
+        <label class="field">
+          <span class="field__label">Commander <span class="req" aria-hidden="true">*</span></span>
+          <div class="combo">
+            <input
+              id="build-commander"
+              class="input"
+              type="text"
+              placeholder="e.g. Tovolar, Dire Overlord"
+              required
+              aria-expanded="false"
+              aria-controls="build-suggest"
+              aria-autocomplete="list"
+              role="combobox"
+            />
+            <ul id="build-suggest" class="suggest" role="listbox" hidden></ul>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Partner <span class="field__opt">(optional)</span></span>
+          <input id="build-partner" class="input" type="text" placeholder="Partner / background" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Bracket</span>
+          <select id="build-bracket" class="input">
+            <option value="1">1 &mdash; Exhibition</option>
+            <option value="2">2 &mdash; Core / precon</option>
+            <option value="3" selected>3 &mdash; Upgraded</option>
+            <option value="4">4 &mdash; Optimized</option>
+            <option value="5">5 &mdash; cEDH</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Budget <span class="field__opt">(USD, optional)</span></span>
+          <input id="build-budget" class="input" type="number" min="0" step="1" placeholder="e.g. 200" />
+        </label>
+
+        <label class="field field--wide">
+          <span class="field__label">Theme</span>
+          <select id="build-theme" class="input">
+            <option value="">Auto-detect</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button id="build-btn" class="btn btn--primary" type="submit">Weave the deck</button>
+      </div>
+    </form>
+    <div id="build-result" class="build-result" aria-live="polite"></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>MTG Deck Weaver &middot; a local, offline deck engine. Not affiliated with Wizards of the Coast.</p>
+</footer>
+
+<script src="app.js"></script>
