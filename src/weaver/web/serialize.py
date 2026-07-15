@@ -99,6 +99,28 @@ def build_result_to_dict(result: BuildResult) -> dict:
     }
 
 
+from urllib.parse import quote as _quote
+
+
+def _image_url(row) -> str:
+    """A Scryfall image URL for this card. Uses the exact printing when we have
+    a Scryfall id, else falls back to an exact-name lookup (works for any real
+    card). Loaded client-side by the browser, so it needs internet — the rest
+    of the app stays offline.
+    """
+    sid = _try(row, "scryfall_id")
+    if sid:
+        return f"https://api.scryfall.com/cards/{sid}?format=image&version=normal"
+    return f"https://api.scryfall.com/cards/named?exact={_quote(row['name'])}&format=image&version=normal"
+
+
+def _try(row, col):
+    try:
+        return row[col]
+    except (IndexError, KeyError):
+        return None
+
+
 # ---- card lookup ----------------------------------------------------------
 def card_to_dict(conn: sqlite3.Connection, row) -> dict:
     roles = [
@@ -124,6 +146,7 @@ def card_to_dict(conn: sqlite3.Connection, row) -> dict:
         "price_usd": row["price_usd"],
         "roles": roles,
         "combo_count": combo_count,
+        "image_url": _image_url(row),
     }
 
 

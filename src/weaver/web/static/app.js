@@ -271,6 +271,18 @@ function initCard() {
 function renderCard(card) {
   const panel = el("div", { class: "panel" });
 
+  // Card artwork (loaded from Scryfall by the browser — needs internet; the
+  // image quietly removes itself if it can't load, so the text view still works).
+  if (card.image_url) {
+    panel.append(el("img", {
+      class: "card-image",
+      src: card.image_url,
+      alt: `${card.name} card image`,
+      loading: "lazy",
+      onerror: (e) => e.target.remove(),
+    }));
+  }
+
   // Header: name + mana cost
   panel.append(
     el("div", { class: "card-head" }, [

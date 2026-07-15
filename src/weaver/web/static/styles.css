@@ -361,6 +361,14 @@ select.input { cursor: pointer; }
   border: 1px solid var(--border); border-radius: var(--radius);
   padding: 1.5rem; box-shadow: var(--shadow); margin-top: 1.4rem;
 }
+.card-image {
+  float: right; width: 240px; max-width: 42%;
+  margin: 0 0 1rem 1.5rem; border-radius: 4.75% / 3.5%;
+  box-shadow: var(--shadow); background: var(--bg-2);
+}
+@media (max-width: 560px) {
+  .card-image { float: none; display: block; width: 60%; max-width: 240px; margin: 0 auto 1rem; }
+}
 .card-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
 .card-name { font-size: 1.6rem; margin: 0; color: var(--text); }
 .card-cost { font-family: ui-monospace, Menlo, monospace; color: var(--gold); font-size: 1.05rem; white-space: nowrap; }

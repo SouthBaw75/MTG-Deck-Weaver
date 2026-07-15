@@ -57,6 +57,9 @@ def test_card_lookup(client):
     body = r.json()
     assert body["name"] == "Sol Ring"
     assert any(role["tag"] == "ramp.rock" for role in body["roles"])
+    # card view includes a Scryfall image URL (loaded client-side)
+    assert "image_url" in body and body["image_url"].startswith("https://api.scryfall.com/")
+    assert "Sol%20Ring" in body["image_url"] or "format=image" in body["image_url"]
 
 
 def test_card_fuzzy_and_404(client):
