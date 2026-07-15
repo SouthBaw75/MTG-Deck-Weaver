@@ -69,6 +69,48 @@ def test_search(client):
     assert "Sol Ring" in names or "Tovolar, Dire Overlord" in names
 
 
+def test_search_commander_filter_excludes_noncreatures():
+    """The commander search must only return commander-eligible cards —
+    legendary creatures, not lands/enchantments/artifacts."""
+    import json as _json
+    from weaver.db.connection import connect
+    from weaver.db.schema import apply_schema
+
+    import tempfile
+    from pathlib import Path
+
+    tmp = Path(tempfile.mkdtemp()) / "c.db"
+    conn = connect(tmp)
+    apply_schema(conn)
+    rows = [
+        ("k1", "Krenko, Mob Boss", "Legendary Creature — Goblin Warrior", []),
+        ("k2", "Sol Ring", "Artifact", []),
+        ("k3", "Rhystic Study", "Enchantment", ["U"]),
+        ("k4", "Command Tower", "Land", []),
+        ("k5", "Kytheon, Hero of Akros", "Legendary Creature — Human Soldier", ["W"]),
+    ]
+    for oid, name, tl, ci in rows:
+        conn.execute(
+            "INSERT INTO cards(oracle_id,name,type_line,mana_value,color_identity,"
+            "legal_commander,is_game_changer) VALUES(?,?,?,0,?,'legal',0)",
+            (oid, name, tl, _json.dumps(ci)),
+        )
+    conn.commit()
+    conn.close()
+    c = TestClient(create_app(str(tmp)))
+
+    # generic search returns everything matching
+    allk = c.get("/api/search", params={"q": "o"}).json()
+    assert "Sol Ring" in allk and "Command Tower" in allk
+
+    # commander search excludes the artifact/enchantment/land
+    cmd = c.get("/api/search", params={"q": "o", "kind": "commander"}).json()
+    assert "Krenko, Mob Boss" in cmd
+    assert "Sol Ring" not in cmd
+    assert "Rhystic Study" not in cmd
+    assert "Command Tower" not in cmd
+
+
 def test_analyze(client):
     decklist = "Commander\n1 Tovolar, Dire Overlord\nDeck\n1 Sol Ring\n1 Lightning Bolt\n30 Forest\n30 Mountain\n"
     r = client.post("/api/analyze", json={"decklist": decklist})

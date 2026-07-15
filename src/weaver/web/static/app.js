@@ -133,7 +133,7 @@ themeBtn.addEventListener("click", () => {
  * Wires a text input + <ul> listbox to /api/search. Debounced. Keyboard support
  * (ArrowUp/Down, Enter, Escape). `onPick(name)` fires when a suggestion is chosen.
  */
-function attachAutocomplete(input, list, onPick) {
+function attachAutocomplete(input, list, onPick, kind) {
   let items = [];
   let active = -1;
 
@@ -176,7 +176,8 @@ function attachAutocomplete(input, list, onPick) {
   const lookup = debounce(async (q) => {
     if (!q || q.trim().length < 2) { close(); return; }
     try {
-      items = await api(`/api/search?q=${encodeURIComponent(q.trim())}`);
+      const kindParam = kind ? `&kind=${encodeURIComponent(kind)}` : "";
+      items = await api(`/api/search?q=${encodeURIComponent(q.trim())}${kindParam}`);
       active = -1;
       render();
     } catch (err) {
@@ -568,13 +569,15 @@ async function initBuild() {
   if (form.dataset.ready) return;
   form.dataset.ready = "1";
 
-  // Commander autocomplete (reuses the shared widget). Partner too.
-  attachAutocomplete(cmdInput, cmdList, (name) => { cmdInput.value = name; });
+  // Commander autocomplete — restricted to commander-eligible cards (legendary
+  // creatures or "can be your commander"), not the whole card pool.
+  attachAutocomplete(cmdInput, cmdList, (name) => { cmdInput.value = name; }, "commander");
   // Partner shares a listbox element; build a lightweight second one dynamically.
   const partnerList = el("ul", { id: "build-partner-suggest", class: "suggest", role: "listbox", hidden: "" });
   partnerInput.closest(".field").append(partnerList);
   partnerInput.setAttribute("aria-controls", "build-partner-suggest");
-  attachAutocomplete(partnerInput, partnerList, (name) => { partnerInput.value = name; });
+  // Partner also allows Backgrounds (for "Choose a Background" commanders).
+  attachAutocomplete(partnerInput, partnerList, (name) => { partnerInput.value = name; }, "partner");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();

@@ -86,13 +86,28 @@ def create_app(db_path: str | None = None) -> FastAPI:
         return card_to_dict(conn, row)
 
     @app.get("/api/search")
-    def search(q: str, limit: int = 15):
+    def search(q: str, limit: int = 15, kind: str = "any"):
+        """Name search. kind='commander' restricts to commander-eligible cards
+        (legendary creatures or cards that say they can be your commander);
+        kind='partner' additionally allows Backgrounds."""
         conn = db()
         _require_cards(conn)
+        where = ["name LIKE ? COLLATE NOCASE"]
+        params: list = [f"%{q}%"]
+        if kind in ("commander", "partner"):
+            # CR 903.3: a legendary creature, or a card that can be your commander.
+            clause = (
+                "((type_line LIKE '%Legendary%' AND type_line LIKE '%Creature%')"
+                " OR oracle_text LIKE '%can be your commander%'"
+            )
+            if kind == "partner":
+                clause += " OR type_line LIKE '%Background%'"
+            clause += ")"
+            where.append(clause)
         rows = conn.execute(
-            "SELECT name FROM cards WHERE name LIKE ? COLLATE NOCASE "
+            f"SELECT name FROM cards WHERE {' AND '.join(where)} "
             "ORDER BY (edhrec_rank IS NULL), edhrec_rank LIMIT ?",
-            (f"%{q}%", limit),
+            (*params, limit),
         ).fetchall()
         return [r["name"] for r in rows]
 
