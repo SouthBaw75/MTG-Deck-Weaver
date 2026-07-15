@@ -173,6 +173,56 @@ def tag(ctx: click.Context):
 
 
 @cli.command()
+@click.argument("name")
+@click.option("-n", "top_n", default=15, help="How many partners to list")
+@click.pass_context
+def synergies(ctx: click.Context, name: str, top_n: int):
+    """Find cards that synergize with a given card via the mechanic graph."""
+    from weaver.knowledge.cardview import CardView
+    from weaver.knowledge.synergy import find_partners
+
+    conn = _open_db(ctx.obj["db_path"])
+    row = conn.execute("SELECT * FROM cards WHERE name = ? COLLATE NOCASE", (name,)).fetchone()
+    if row is None:
+        row = conn.execute(
+            "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE ORDER BY edhrec_rank LIMIT 1",
+            (f"%{name}%",),
+        ).fetchone()
+    if row is None:
+        console.print(f"[red]No card matching[/red] {name!r}")
+        raise SystemExit(1)
+
+    target_tags = {
+        t["tag"]: t["quality"]
+        for t in conn.execute("SELECT tag, quality FROM card_tags WHERE oracle_id = ?", (row["oracle_id"],))
+    }
+    if not target_tags:
+        console.print(f"[yellow]{row['name']} has no role tags[/yellow] — run `weaver tag` first.")
+        raise SystemExit(1)
+
+    # Candidate pool: all tagged cards, tags aggregated per card.
+    class _C:
+        __slots__ = ("name", "tags")
+        def __init__(self, name, tags):
+            self.name, self.tags = name, tags
+
+    agg: dict[str, dict[str, float]] = {}
+    for r in conn.execute(
+        "SELECT c.name AS name, ct.tag AS tag, ct.quality AS q "
+        "FROM cards c JOIN card_tags ct ON ct.oracle_id = c.oracle_id WHERE c.name != ?",
+        (row["name"],),
+    ):
+        agg.setdefault(r["name"], {})[r["tag"]] = r["q"]
+    pool = [_C(n, tags) for n, tags in agg.items()]
+    partners = find_partners(target_tags, pool, top_n=top_n)
+
+    console.print(f"[bold]{row['name']}[/bold] — synergy partners  [dim]({', '.join(target_tags)})[/dim]")
+    for pname, score, note in partners:
+        tag = "[green]" if score > 0 else "[red]"
+        console.print(f"  {tag}{score:+.2f}[/]  {pname}" + (f"  [dim]{note}[/dim]" if note else ""))
+
+
+@cli.command()
 @click.argument("tag_name", required=False)
 @click.option("-n", "top_n", default=15, help="How many cards to list")
 @click.pass_context
