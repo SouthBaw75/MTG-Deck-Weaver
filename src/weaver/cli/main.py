@@ -286,6 +286,24 @@ def analyze(ctx: click.Context, decklist: str):
 
 
 @cli.command()
+@click.option("--host", default="127.0.0.1", help="Bind host")
+@click.option("--port", default=8000, type=int, help="Bind port")
+@click.pass_context
+def serve(ctx: click.Context, host: str, port: int):
+    """Launch the local web app (browser UI for lookup, analyze, and build)."""
+    try:
+        import uvicorn
+    except ImportError:
+        console.print("[red]Web dependencies not installed.[/red] Run: pip install -e \".[web]\"")
+        raise SystemExit(1)
+    from weaver.web.app import create_app
+
+    app = create_app(ctx.obj["db_path"])
+    console.print(f"[green]MTG Deck Weaver[/green] running at http://{host}:{port}")
+    uvicorn.run(app, host=host, port=port, log_level="info")
+
+
+@cli.command()
 @click.pass_context
 def stats(ctx: click.Context):
     """Show knowledge base row counts and data freshness."""
