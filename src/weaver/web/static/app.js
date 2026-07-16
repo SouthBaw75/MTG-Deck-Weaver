@@ -116,6 +116,9 @@ function cardLink(name, extraClass) {
 
 let _modal = null;
 let _modalReturnFocus = null;
+// The editable analysis currently on screen ({getDecklist, apply, arena,
+// commanders}). Lets the card popup offer "Replace in deck" for any deck card.
+let _activeCtx = null;
 
 function ensureModal() {
   if (_modal) return _modal;
@@ -149,6 +152,18 @@ async function openCardModal(name) {
     const card = await api(`/api/card/${encodeURIComponent(name)}`);
     body.innerHTML = "";
     body.append(renderCard(card));
+    // If this card is part of the deck we're actively editing, offer to swap it
+    // for a legal, same-role equivalent (not for the commander).
+    const cardName = card.name || name;
+    if (_activeCtx && cardInList(_activeCtx.getDecklist(), cardName) &&
+        !(_activeCtx.commanders || []).some((c) => c && c.toLowerCase() === cardName.toLowerCase())) {
+      body.append(el("div", { class: "modal-actions" }, [
+        el("button", {
+          type: "button", class: "btn btn--primary btn--small",
+          onclick: () => { closeCardModal(); openReplaceChooser(_activeCtx, cardName); },
+        }, [document.createTextNode("↔ Replace in deck")]),
+      ]));
+    }
   } catch (err) {
     body.innerHTML = "";
     const msg = err.status === 404
@@ -541,7 +556,9 @@ function initAnalyze() {
         getDecklist: () => input.value,
         apply: (dl) => { input.value = dl; form.requestSubmit(); },
         arena: !!(arena && arena.checked),
+        commanders: result.commanders || [],
       };
+      _activeCtx = ctx;
       out.append(renderAnalysis(result, true, ctx, ctx.arena));
     } catch (err) {
       out.innerHTML = "";
@@ -1179,6 +1196,7 @@ function renderDossier(d) {
   const buildCtx = {
     getDecklist: () => state.decklist,
     arena: builtArena,
+    commanders: [d.commander, d.partner].filter(Boolean),
     apply: async (dl) => {
       state.decklist = dl;
       if (copyTextarea) copyTextarea.value = dl;
@@ -1197,6 +1215,8 @@ function renderDossier(d) {
       }
     },
   };
+
+  _activeCtx = buildCtx;
 
   // ---- Header ----
   const head = el("div", { class: "build-head" });

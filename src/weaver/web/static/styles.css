@@ -531,6 +531,7 @@ select.input { cursor: pointer; }
   border-color: var(--gold); background: color-mix(in srgb, var(--gold) 22%, var(--bg-2));
 }
 .replace-all-btn { margin-top: .7rem; padding: .3rem .7rem; font-size: .82rem; }
+.modal-actions { margin-top: 1rem; display: flex; justify-content: flex-end; gap: .5rem; }
 
 /* Cut chooser modal: pick a card to remove when accepting an upgrade. */
 .cut-modal { max-width: 34rem; }
