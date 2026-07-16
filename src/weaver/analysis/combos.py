@@ -128,23 +128,22 @@ def load_combo_index(conn: sqlite3.Connection, deck_card_names: set[str]) -> lis
 
 
 def _card_on_arena(conn: sqlite3.Connection, name: str) -> bool:
-    """Whether a card is available on MTG Arena (per Scryfall's `games`).
-    Tolerant of DFC/split half-names, so combo pieces resolve like the loader."""
+    """Whether a card is available on MTG Arena (Scryfall `games` + curated
+    overrides). Tolerant of DFC/split half-names, like the loader."""
+    from weaver.knowledge.arena import is_on_arena
+
     row = conn.execute(
-        "SELECT games FROM cards WHERE name = ? COLLATE NOCASE", (name,)
+        "SELECT name, games FROM cards WHERE name = ? COLLATE NOCASE", (name,)
     ).fetchone()
     if row is None:
         row = conn.execute(
-            "SELECT games FROM cards WHERE name LIKE ? COLLATE NOCASE "
+            "SELECT name, games FROM cards WHERE name LIKE ? COLLATE NOCASE "
             "AND name LIKE '% // %' ORDER BY length(name) LIMIT 1",
             (f"{name} // %",),
         ).fetchone()
-    if row is None or not row["games"]:
-        return False
-    try:
-        return "arena" in json.loads(row["games"])
-    except (ValueError, TypeError):
-        return False
+    if row is None:
+        return is_on_arena(name, None)
+    return is_on_arena(row["name"], row["games"])
 
 
 def detect_deck_combos(conn: sqlite3.Connection, deck) -> tuple[list[ComboMatch], list[ComboMatch]]:

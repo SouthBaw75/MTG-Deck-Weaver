@@ -10,17 +10,14 @@ from weaver.knowledge.cardview import CardView
 
 
 def _row_on_arena(row) -> bool:
-    """Whether a resolved card is available on MTG Arena (per Scryfall `games`)."""
+    """Whether a resolved card is on MTG Arena (Scryfall `games` + overrides)."""
+    from weaver.knowledge.arena import is_on_arena
+
     try:
         raw = row["games"]
     except (IndexError, KeyError):
-        return False
-    if not raw:
-        return False
-    try:
-        return "arena" in json.loads(raw)
-    except (ValueError, TypeError):
-        return False
+        raw = None
+    return is_on_arena(row["name"], raw)
 
 
 def _resolve_row(conn: sqlite3.Connection, name: str):

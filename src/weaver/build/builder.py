@@ -104,6 +104,46 @@ def _synergy_profile(commander, partner, bias: dict[str, float]) -> dict[str, fl
     return profile
 
 
+def _enforce_arena(conn, result, pool) -> list[tuple[str, str]]:
+    """Belt-and-suspenders for Arena builds: re-verify every nonland pick and
+    swap any that aren't on Arena for a legal spare from the pool (same role if
+    possible). Normally a no-op (the pool is already Arena-filtered), but it
+    guarantees the exported deck imports, and catches stale-data edge cases.
+    Returns the (old, new) swaps made. The commander can't be swapped."""
+    from weaver.knowledge.arena import is_on_arena
+
+    def on_arena(name: str) -> bool:
+        row = conn.execute(
+            "SELECT name, games FROM cards WHERE name = ? COLLATE NOCASE", (name,)
+        ).fetchone()
+        return is_on_arena(name, row["games"] if row else None)
+
+    used = {result.commander.name}
+    if result.partner:
+        used.add(result.partner.name)
+    used.update(a.candidate.name for a in result.all_cards)
+    spares = [
+        c for c in sorted(pool, key=lambda c: c.score, reverse=True)
+        if c.name not in used and not c.is_land and on_arena(c.name)
+    ]
+
+    swaps: list[tuple[str, str]] = []
+    for a in result.assignments:
+        if on_arena(a.candidate.name):
+            continue
+        repl = next((c for c in spares if set(c.tags) & set(a.candidate.tags)), None)
+        if repl is None:
+            repl = spares[0] if spares else None
+        if repl is None:
+            continue
+        spares.remove(repl)
+        swaps.append((a.candidate.name, repl.name))
+        a.candidate = repl
+        a.score = repl.score
+        a.reason = f"Arena-legal swap (was {swaps[-1][0]})"
+    return swaps
+
+
 def build_deck(conn: sqlite3.Connection, request: BuildRequest) -> BuildResult:
     commander, partner, pool = build_pool(conn, request)
     archetype_keys, bias = _archetype_bias(commander, request)
@@ -128,8 +168,16 @@ def build_deck(conn: sqlite3.Connection, request: BuildRequest) -> BuildResult:
         result.notes.insert(0, "archetype: goodstuff (no strong archetype signal / theme)")
     if request.arena_only:
         result.notes.insert(0, "Arena-only: pool restricted to cards available on MTG Arena (for Brawl).")
+        arena_swaps = _enforce_arena(conn, result, pool)
+        if arena_swaps:
+            result.notes.insert(
+                0,
+                "Arena guard: replaced " + ", ".join(f"{o}→{n}" for o, n in arena_swaps),
+            )
+        else:
+            result.notes.insert(0, "Arena guard: all non-commander cards verified on MTG Arena.")
         crow = conn.execute(
-            "SELECT games FROM cards WHERE name = ? COLLATE NOCASE", (commander.name,)
+            "SELECT name, games FROM cards WHERE name = ? COLLATE NOCASE", (commander.name,)
         ).fetchone()
         from weaver.build.pool import _on_arena
         if crow is not None and not _on_arena(crow):

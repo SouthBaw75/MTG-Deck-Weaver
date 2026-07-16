@@ -29,16 +29,13 @@ def _deck_identity(deck) -> set[str]:
 
 
 def _row_on_arena(row) -> bool:
+    from weaver.knowledge.arena import is_on_arena
+
     try:
         raw = row["games"]
     except (IndexError, KeyError):
-        return False
-    if not raw:
-        return False
-    try:
-        return "arena" in json.loads(raw)
-    except (ValueError, TypeError):
-        return False
+        raw = None
+    return is_on_arena(row["name"], raw)
 
 
 def _target(deck, card_name: str):

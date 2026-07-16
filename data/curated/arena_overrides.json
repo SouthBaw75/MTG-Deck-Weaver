@@ -1,0 +1,7 @@
+{
+  "_comment": "Force Arena legality when Scryfall's `games` data is wrong/stale. names are case-insensitive, use the full Scryfall name (DFC/split: 'Front // Back').",
+  "not_arena": [
+    "Bilbo, Luckwearer // Burglar's Plot"
+  ],
+  "on_arena": []
+}

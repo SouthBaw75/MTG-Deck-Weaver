@@ -56,17 +56,19 @@ def _tags_for(conn: sqlite3.Connection, oracle_id: str) -> dict[str, float]:
 
 
 def _on_arena(row) -> bool:
-    """True if the card is available on MTG Arena (per Scryfall's `games`)."""
+    """True if the card is available on MTG Arena (Scryfall `games` + curated
+    overrides)."""
+    from weaver.knowledge.arena import is_on_arena
+
     try:
         raw = row["games"]
     except (IndexError, KeyError):
-        return False
-    if not raw:
-        return False
+        raw = None
     try:
-        return "arena" in json.loads(raw)
-    except (ValueError, TypeError):
-        return False
+        name = row["name"]
+    except (IndexError, KeyError):
+        name = None
+    return is_on_arena(name, raw)
 
 
 def commander_color_identity(commander: Candidate, partner: Candidate | None) -> set[str]:
