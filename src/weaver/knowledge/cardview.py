@@ -29,6 +29,16 @@ SUPERTYPES = {"basic", "legendary", "ongoing", "snow", "world"}
 _FULL_NAME_LAYOUTS = {"split", "aftermath"}
 
 
+def canonical_card_name(name: str) -> str:
+    """Collapse an Alchemy-rebalanced name ("A-Spell Satchel") to its base name
+    ("Spell Satchel"). MTG Arena treats the two as the SAME card for singleton /
+    Brawl, so a deck must never run both — they'd merge on import and leave the
+    deck short. Case-insensitive on the "A-" prefix; other names pass through."""
+    if len(name) > 2 and name[0] in "Aa" and name[1] == "-":
+        return name[2:]
+    return name
+
+
 def export_card_name(name: str, layout: str | None = None) -> str:
     """The card name to write into an exported/importable decklist.
 

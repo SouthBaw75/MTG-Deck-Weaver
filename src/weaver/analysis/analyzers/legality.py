@@ -102,6 +102,8 @@ def _any_number_allowed(dc) -> bool:
 
 
 def _check_singleton(deck, section, violations) -> None:
+    from weaver.knowledge.cardview import canonical_card_name
+
     offenders = []
     for dc in deck.cards:
         if dc.quantity <= 1:
@@ -119,7 +121,27 @@ def _check_singleton(deck, section, violations) -> None:
                 f"singleton violation: {qty}x {name} (max 1 outside basic lands "
                 "and cards that allow any number)",
             )
-    else:
+
+    # Alchemy rebalanced duplicates: two distinct names that are the SAME card in
+    # MTG Arena ("Spell Satchel" and "A-Spell Satchel"). Arena merges them on
+    # import, so the deck lands a card short of 100.
+    by_canon: dict[str, set[str]] = {}
+    for dc in deck.cards:
+        if dc.is_basic_land:
+            continue
+        by_canon.setdefault(canonical_card_name(dc.name).lower(), set()).add(dc.name)
+    dupes = [sorted(names) for names in by_canon.values() if len(names) > 1]
+    if dupes:
+        violations["alchemy_duplicates"] = dupes
+        for names in dupes:
+            section.add(
+                "problem",
+                f"{' and '.join(names)} are the same card in MTG Arena (Alchemy "
+                "rebalance) — Arena keeps only one, so the deck imports a card short. "
+                "Remove one copy.",
+            )
+
+    if not offenders and not dupes:
         section.add("ok", "singleton rule satisfied")
 
 

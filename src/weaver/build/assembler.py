@@ -24,6 +24,7 @@ from pathlib import Path
 from weaver.analysis.analyzers.manabase import RAMP_TAGS, recommend_land_count
 from weaver.build.types import BuildRequest, BuildResult, Candidate, SlotAssignment
 from weaver.db.connection import repo_root
+from weaver.knowledge.cardview import canonical_card_name as _canon
 
 _PIP = re.compile(r"\{([^}]+)\}")
 _COLORS = ("W", "U", "B", "R", "G")
@@ -107,7 +108,10 @@ class _Picker:
         self.spent = 0.0
 
     def can_take(self, cand: Candidate) -> bool:
-        if cand.name in self.chosen:
+        # Key on the canonical name so an Alchemy rebalance ("A-Spell Satchel")
+        # and its original ("Spell Satchel") count as one card (Arena merges
+        # them on import — running both would leave the deck a card short).
+        if _canon(cand.name) in self.chosen:
             return False
         if cand.is_game_changer and self.gc_limit is not None and self.gc_count >= self.gc_limit:
             return False
@@ -117,7 +121,7 @@ class _Picker:
         return True
 
     def take(self, cand: Candidate) -> None:
-        self.chosen.add(cand.name)
+        self.chosen.add(_canon(cand.name))
         if cand.is_game_changer:
             self.gc_count += 1
         if cand.price_usd:
@@ -125,7 +129,7 @@ class _Picker:
 
     def release(self, cand: Candidate) -> None:
         """Undo take(): free a slot (used when rebalancing lands/combos)."""
-        self.chosen.discard(cand.name)
+        self.chosen.discard(_canon(cand.name))
         if cand.is_game_changer:
             self.gc_count = max(0, self.gc_count - 1)
         if cand.price_usd:
