@@ -476,6 +476,23 @@ select.input { cursor: pointer; }
 .card-chip:hover, .card-chip:focus-visible { border-color: var(--gold); }
 .section-sublabel { color: var(--text-dim); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; margin: 1rem 0 .2rem; }
 
+/* One-card-away combo upgrades (Analyze view): actionable "Add" rows. */
+.combo-adds { margin-top: .4rem; display: flex; flex-direction: column; gap: .4rem; }
+.combo-add { display: flex; align-items: baseline; flex-wrap: wrap; gap: .5rem; }
+.combo-add__btn {
+  flex: none; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--border));
+  background: color-mix(in srgb, var(--gold) 12%, var(--bg-2));
+  color: var(--text); border-radius: 999px; padding: .2rem .7rem; font-size: .85rem;
+  white-space: nowrap; transition: background .12s, border-color .12s;
+}
+.combo-add__btn strong { color: var(--gold); font-weight: 600; }
+.combo-add__btn:hover, .combo-add__btn:focus-visible {
+  border-color: var(--gold); background: color-mix(in srgb, var(--gold) 22%, var(--bg-2));
+}
+.combo-add__desc { color: var(--text-dim); font-size: .85rem; }
+.combo-add__produces { color: var(--text); }
+
 /* Card popup modal */
 body.modal-open { overflow: hidden; }
 .modal-overlay {

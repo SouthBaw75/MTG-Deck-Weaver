@@ -208,6 +208,12 @@ document.addEventListener("click", (e) => {
     openImgLightbox(image.currentSrc || image.src, image.alt);
     return;
   }
+  const addBtn = e.target.closest("[data-add-card]");
+  if (addBtn) {
+    e.preventDefault();
+    addCardToAnalysis(addBtn.getAttribute("data-add-card"));
+    return;
+  }
   const link = e.target.closest(".card-link[data-card]");
   if (link) {
     e.preventDefault();
@@ -499,7 +505,7 @@ function initAnalyze() {
       const result = await api("/api/analyze", { method: "POST", body: JSON.stringify({ decklist }) });
       out.innerHTML = "";
       out.append(saveBar(decklist, { commander: result.commanders && result.commanders[0] }));
-      out.append(renderAnalysis(result));
+      out.append(renderAnalysis(result, true));  // editable: enables "Add to deck"
     } catch (err) {
       out.innerHTML = "";
       out.append(el("div", { class: "banner banner--empty", text: err.message }));
@@ -509,8 +515,9 @@ function initAnalyze() {
   });
 }
 
-/** Full analysis renderer: header + each section (with charts). */
-function renderAnalysis(a) {
+/** Full analysis renderer: header + each section (with charts).
+ *  `editable` enables in-place actions like "Add to deck" (Analyze view only). */
+function renderAnalysis(a, editable = false) {
   const frag = document.createDocumentFragment();
 
   // Header
@@ -531,12 +538,12 @@ function renderAnalysis(a) {
   frag.append(head);
 
   // Sections
-  for (const section of a.sections || []) frag.append(renderSection(section));
+  for (const section of a.sections || []) frag.append(renderSection(section, editable));
   return frag;
 }
 
 /** One analysis section card, colored by worst_severity, with findings + charts. */
-function renderSection(section) {
+function renderSection(section, editable = false) {
   const node = el("section", { class: "asection", dataset: { sev: section.worst_severity || "info" } });
   node.append(el("h3", { class: "asection__title", text: section.title }));
 
@@ -557,21 +564,66 @@ function renderSection(section) {
   if (section.title === "Mana Base") appendManaCharts(node, data);
   else if (section.title === "Role Coverage") appendRoleChart(node, data);
   else if (section.title === "Consistency") appendConsistencyChart(node, data);
-  else if (section.title === "Combos & Win Lines") appendComboCards(node, data);
+  else if (section.title === "Combos & Win Lines") appendComboCards(node, data, editable);
   else if (section.title === "Synergy") appendSynergyCards(node, data);
 
   return node;
 }
 
-/** Clickable card chips for every card named in the combos section. */
-function appendComboCards(node, data) {
+/** Combos section: actionable "one card away" upgrades (Analyze view only),
+ *  then clickable card chips for every card named in the section. */
+function appendComboCards(node, data, editable = false) {
+  const near = data.near_miss || [];
+
+  // When we have an editable decklist in scope, offer one-click completion of
+  // each near-miss combo: add the single missing card and re-analyze.
+  if (editable && near.length) {
+    const wrap = el("div", { class: "combo-adds" });
+    wrap.append(el("p", { class: "section-sublabel", text: "Complete a combo — add the missing card" }));
+    for (const c of near) {
+      const missing = (c.missing || [])[0];
+      if (!missing) continue;
+      const have = (c.cards || []).filter((n) => n !== missing);
+      const produces = (c.produces && c.produces.length) ? c.produces.join(", ") : "a combo result";
+      const btn = el("button", {
+        type: "button",
+        class: "combo-add__btn",
+        "data-add-card": missing,
+        title: `Add ${missing} to the decklist and re-analyze`,
+      }, [document.createTextNode("+ Add "), el("strong", { text: missing })]);
+      const desc = el("span", { class: "combo-add__desc" }, [
+        document.createTextNode(have.length ? `pairs with ${have.join(" + ")} → ` : `→ `),
+        el("span", { class: "combo-add__produces", text: produces }),
+      ]);
+      wrap.append(el("div", { class: "combo-add" }, [btn, desc]));
+    }
+    node.append(wrap);
+  }
+
   const names = new Set();
   for (const c of (data.present || [])) (c.cards || []).forEach((n) => names.add(n));
-  for (const c of (data.near_miss || [])) {
+  for (const c of near) {
     (c.cards || []).forEach((n) => names.add(n));
     (c.missing || []).forEach((n) => names.add(n));
   }
   appendCardChipRow(node, names);
+}
+
+/** Append `1 <name>` to the Analyze decklist and re-run the analysis. */
+function addCardToAnalysis(name) {
+  const input = $("#analyze-input");
+  const form = $("#analyze-form");
+  if (!input || !form) return;
+  const norm = (s) => s.replace(/^\s*\d+\s*x?\s*/i, "").trim().toLowerCase();
+  const already = input.value.split("\n").some((l) => l.trim() && norm(l) === name.toLowerCase());
+  if (already) {
+    showToast(`${name} is already in the decklist.`);
+    return;
+  }
+  const body = input.value.replace(/\s*$/, "");
+  input.value = (body ? body + "\n" : "") + `1 ${name}`;
+  showToast(`Added ${name} — re-analyzing. Cut a card to stay at 100.`);
+  form.requestSubmit();
 }
 
 /** Clickable card chips for every card named in the synergy section. */
