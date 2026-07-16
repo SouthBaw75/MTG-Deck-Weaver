@@ -217,6 +217,22 @@ document.addEventListener("click", (e) => {
     if (ctx) beginComboUpgrade(ctx, addBtn.getAttribute("data-add-card"), addBtn.hasAttribute("data-arena-illegal"));
     return;
   }
+  const replaceAll = e.target.closest("[data-replace-all]");
+  if (replaceAll) {
+    e.preventDefault();
+    const ctx = replaceAll.closest(".analysis")?.__weaverCtx;
+    const banner = replaceAll.closest(".off-arena-banner");
+    const names = banner ? [...banner.querySelectorAll("[data-replace-card]")].map((b) => b.getAttribute("data-replace-card")) : [];
+    if (ctx && names.length) replaceAllOffArena(ctx, names);
+    return;
+  }
+  const replaceBtn = e.target.closest("[data-replace-card]");
+  if (replaceBtn) {
+    e.preventDefault();
+    const ctx = replaceBtn.closest(".analysis")?.__weaverCtx;
+    if (ctx) openReplaceChooser(ctx, replaceBtn.getAttribute("data-replace-card"));
+    return;
+  }
   const link = e.target.closest(".card-link[data-card]");
   if (link) {
     e.preventDefault();
@@ -562,12 +578,27 @@ function renderAnalysis(a, editable = false, ctx = null, arena = false) {
   }
   // Arena legality of the deck itself (only when the deck is flagged as Arena).
   if (arena && a.off_arena && a.off_arena.length) {
-    const banner = el("div", { class: "banner off-arena-banner", style: "margin-top:.8rem" },
-      [document.createTextNode(`⚠ ${a.off_arena.length} card(s) not on MTG Arena — this deck won't import into Brawl: `)]);
-    a.off_arena.forEach((n, i) => {
-      if (i) banner.append(document.createTextNode(", "));
-      banner.append(cardLink(n));
+    const banner = el("div", { class: "banner off-arena-banner", style: "margin-top:.8rem" });
+    banner.append(el("p", { class: "off-arena__lead", text:
+      `⚠ ${a.off_arena.length} card(s) not on MTG Arena — this deck won't import into Brawl.` }));
+    const list = el("div", { class: "off-arena__list" });
+    a.off_arena.forEach((n) => {
+      const item = el("span", { class: "off-arena__item" }, [cardLink(n)]);
+      if (editable && ctx) {
+        item.append(el("button", {
+          type: "button", class: "replace-btn", "data-replace-card": n,
+          title: `Replace ${n} with a legal card of similar power`,
+        }, [document.createTextNode("↔ Replace")]));
+      }
+      list.append(item);
     });
+    banner.append(list);
+    if (editable && ctx && a.off_arena.length > 1) {
+      banner.append(el("button", {
+        type: "button", class: "replace-all-btn", "data-replace-all": "1",
+        title: "Replace every off-Arena card with a legal equivalent",
+      }, [document.createTextNode("↔ Replace all with legal cards")]));
+    }
     head.append(banner);
   }
   frag.append(head);
@@ -803,6 +834,94 @@ function closeCutChooser() {
   _cutModal.overlay.hidden = true;
   if (!imgLightboxOpen() && (!_modal || _modal.overlay.hidden)) {
     document.body.classList.remove("modal-open");
+  }
+}
+
+/* ---------- Replace a card with a legal equivalent ------------------------ */
+/** Open a chooser of legal, same-role, similar-power replacements for a card. */
+async function openReplaceChooser(ctx, oldName) {
+  const arena = !!(ctx && ctx.arena);
+  const { overlay, body } = ensureCutModal();
+  const render = (children) => {
+    body.innerHTML = "";
+    body.append(el("h3", { class: "cut-chooser__title", text: `Replace ${oldName}` }));
+    for (const c of children) body.append(c);
+    const actions = el("div", { class: "cut-actions" });
+    actions.append(el("button", { type: "button", class: "cut-action cut-action--ghost", text: "Cancel", onclick: closeCutChooser }));
+    body.append(actions);
+  };
+  render([loadingNode("Finding legal replacements…")]);
+  overlay.hidden = false;
+  document.body.classList.add("modal-open");
+
+  let reps = [];
+  try {
+    const r = await api("/api/replacements", {
+      method: "POST",
+      body: JSON.stringify({ decklist: ctx.getDecklist(), card: oldName, arena_only: arena, count: 6 }),
+    });
+    reps = r.replacements || [];
+  } catch (_err) { /* fall through to the empty state */ }
+
+  if (!reps.length) {
+    render([el("p", { class: "cut-chooser__none", text:
+      `No ${arena ? "Arena-legal " : ""}same-role replacement found. You can remove ${oldName} manually.` })]);
+    return;
+  }
+  const lead = el("p", { class: "cut-chooser__lead", text:
+    `Same-role, in-color${arena ? ", Arena-legal" : ""} cards of similar power — pick one to swap in:` });
+  const list = el("div", { class: "cut-options" });
+  for (const s of reps) {
+    const btn = el("button", { type: "button", class: "cut-option", onclick: () => applyReplace(ctx, oldName, s.name) });
+    const headRow = el("span", { class: "cut-option__head" }, [el("span", { class: "cut-option__name", text: `→ ${s.name}` })]);
+    if (s.mv_label) headRow.append(el("span", { class: "cut-option__mv", text: `MV ${s.mv_label}` }));
+    btn.append(headRow);
+    btn.append(el("span", { class: "cut-option__reason", text: s.reason }));
+    list.append(btn);
+  }
+  render([lead, list]);
+}
+
+/** Swap oldName -> newName in the decklist and re-analyze. */
+function applyReplace(ctx, oldName, newName) {
+  closeCutChooser();
+  if (!ctx) return;
+  const body = removeCardLine(ctx.getDecklist(), oldName).replace(/\s*$/, "");
+  const next = (body ? body + "\n" : "") + `1 ${newName}`;
+  showToast(`Swapped ${oldName} → ${newName}. Re-analyzing…`);
+  ctx.apply(next);
+}
+
+/** Auto-swap every off-Arena card for its best legal equivalent, then re-analyze. */
+async function replaceAllOffArena(ctx, names) {
+  const arena = !!(ctx && ctx.arena);
+  showToast(`Finding legal replacements for ${names.length} card(s)…`);
+  let text = ctx.getDecklist();
+  let swapped = 0;
+  const failed = [];
+  for (const oldName of names) {
+    try {
+      const r = await api("/api/replacements", {
+        method: "POST",
+        body: JSON.stringify({ decklist: text, card: oldName, arena_only: arena, count: 1 }),
+      });
+      const best = (r.replacements || [])[0];
+      if (best) {
+        const body = removeCardLine(text, oldName).replace(/\s*$/, "");
+        text = (body ? body + "\n" : "") + `1 ${best.name}`;
+        swapped++;
+      } else {
+        failed.push(oldName);
+      }
+    } catch (_err) {
+      failed.push(oldName);
+    }
+  }
+  if (swapped) {
+    showToast(`Replaced ${swapped} card(s) with legal cards${failed.length ? `; no legal match for ${failed.length}` : ""}.`);
+    ctx.apply(text);
+  } else {
+    showToast("No legal replacements found for those cards.");
   }
 }
 

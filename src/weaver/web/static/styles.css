@@ -516,6 +516,21 @@ select.input { cursor: pointer; }
   border-color: color-mix(in srgb, #f19a9a 50%, var(--border));
   background: color-mix(in srgb, #f19a9a 12%, transparent);
 }
+.off-arena__lead { margin: 0 0 .5rem; font-size: .9rem; }
+.off-arena__list { display: flex; flex-wrap: wrap; gap: .5rem; }
+.off-arena__item { display: inline-flex; align-items: center; gap: .3rem;
+  border: 1px solid var(--border); border-radius: 999px; padding: .1rem .3rem .1rem .55rem; background: var(--bg-2); }
+.replace-btn, .replace-all-btn {
+  cursor: pointer; border-radius: 999px; font-size: .72rem; font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--gold) 50%, var(--border));
+  background: color-mix(in srgb, var(--gold) 12%, var(--bg-2)); color: var(--text);
+  padding: .12rem .5rem;
+}
+.replace-btn:hover, .replace-btn:focus-visible,
+.replace-all-btn:hover, .replace-all-btn:focus-visible {
+  border-color: var(--gold); background: color-mix(in srgb, var(--gold) 22%, var(--bg-2));
+}
+.replace-all-btn { margin-top: .7rem; padding: .3rem .7rem; font-size: .82rem; }
 
 /* Cut chooser modal: pick a card to remove when accepting an upgrade. */
 .cut-modal { max-width: 34rem; }

@@ -35,6 +35,13 @@ class CutSuggestBody(BaseModel):
     count: int = 5
 
 
+class ReplaceBody(BaseModel):
+    decklist: str
+    card: str
+    arena_only: bool = False
+    count: int = 5
+
+
 class BuildBody(BaseModel):
     commander: str
     partner: str | None = None
@@ -158,6 +165,23 @@ def create_app(db_path: str | None = None, decks_db_path: str | None = None) -> 
         deck = load_deck(conn, body.decklist)
         count = max(1, min(10, body.count))
         return {"suggestions": suggest_cuts(deck, adding=body.adding, count=count)}
+
+    @app.post("/api/replacements")
+    def replacements(body: ReplaceBody):
+        """Legal, same-role, in-color replacements for a card the user wants out
+        (Arena-legal when arena_only). See weaver.analysis.replace."""
+        from weaver.analysis.loader import load_deck
+        from weaver.analysis.replace import find_replacements
+
+        conn = db()
+        _require_cards(conn)
+        deck = load_deck(conn, body.decklist)
+        count = max(1, min(10, body.count))
+        return {
+            "replacements": find_replacements(
+                conn, deck, body.card, arena_only=body.arena_only, count=count
+            )
+        }
 
     @app.post("/api/build")
     def build(body: BuildBody):
