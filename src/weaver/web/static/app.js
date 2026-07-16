@@ -211,7 +211,10 @@ document.addEventListener("click", (e) => {
   const addBtn = e.target.closest("[data-add-card]");
   if (addBtn) {
     e.preventDefault();
-    addCardToAnalysis(addBtn.getAttribute("data-add-card"));
+    // The editable analysis that owns this button carries its own context
+    // (Analyze input, or a Weaver-built deck's working copy).
+    const ctx = addBtn.closest(".analysis")?.__weaverCtx;
+    if (ctx) beginComboUpgrade(ctx, addBtn.getAttribute("data-add-card"));
     return;
   }
   const link = e.target.closest(".card-link[data-card]");
@@ -506,7 +509,12 @@ function initAnalyze() {
       const result = await api("/api/analyze", { method: "POST", body: JSON.stringify({ decklist }) });
       out.innerHTML = "";
       out.append(saveBar(decklist, { commander: result.commanders && result.commanders[0] }));
-      out.append(renderAnalysis(result, true));  // editable: enables "Add to deck"
+      // Editable: "+ Add" combo upgrades act on the Analyze textarea and re-submit.
+      const ctx = {
+        getDecklist: () => input.value,
+        apply: (dl) => { input.value = dl; form.requestSubmit(); },
+      };
+      out.append(renderAnalysis(result, true, ctx));
     } catch (err) {
       out.innerHTML = "";
       out.append(el("div", { class: "banner banner--empty", text: err.message }));
@@ -517,9 +525,13 @@ function initAnalyze() {
 }
 
 /** Full analysis renderer: header + each section (with charts).
- *  `editable` enables in-place actions like "Add to deck" (Analyze view only). */
-function renderAnalysis(a, editable = false) {
-  const frag = document.createDocumentFragment();
+ *  `editable` enables in-place combo upgrades; `ctx` is the upgrade context
+ *  ({getDecklist, apply}) that the "+ Add" buttons act on. Attached to the root
+ *  so the document-level click handler can find it (works in Analyze and in a
+ *  Weaver-built deck's validation panel alike). */
+function renderAnalysis(a, editable = false, ctx = null) {
+  const frag = el("div", { class: "analysis" });
+  if (editable && ctx) frag.__weaverCtx = ctx;
 
   // Header
   const head = el("div", { class: "analysis-head" });
@@ -637,13 +649,13 @@ function removeCardLine(text, name) {
   return out.join("\n");
 }
 
-/** Accept a combo upgrade: fetch cut candidates, then let the user choose how
- *  to make room (swap one out, or add anyway) before re-analyzing. */
-async function addCardToAnalysis(name) {
-  const input = $("#analyze-input");
-  const form = $("#analyze-form");
-  if (!input || !form) return;
-  if (cardInList(input.value, name)) {
+/** Accept a combo upgrade in the given context: fetch cut candidates, then let
+ *  the user choose how to make room (swap one out, or add anyway). `ctx` is
+ *  {getDecklist, apply} — the Analyze textarea or a Weaver deck's working copy. */
+async function beginComboUpgrade(ctx, name) {
+  if (!ctx) return;
+  const decklist = ctx.getDecklist();
+  if (cardInList(decklist, name)) {
     showToast(`${name} is already in the decklist.`);
     return;
   }
@@ -651,30 +663,29 @@ async function addCardToAnalysis(name) {
   try {
     const r = await api("/api/cut-suggestions", {
       method: "POST",
-      body: JSON.stringify({ decklist: input.value, adding: name, count: 5 }),
+      body: JSON.stringify({ decklist, adding: name, count: 5 }),
     });
     suggestions = r.suggestions || [];
   } catch (_err) {
     /* No suggestions available — the chooser still offers "add anyway". */
   }
-  openCutChooser(name, suggestions);
+  openCutChooser(ctx, name, suggestions);
 }
 
-/** Apply the user's choice: optionally cut `cutName`, add `addName`, re-analyze. */
-function applyCut(addName, cutName) {
+/** Apply the user's choice: optionally cut `cutName`, add `addName`, re-analyze
+ *  through the context's apply(). */
+function applyCut(ctx, addName, cutName) {
   closeCutChooser();
-  const input = $("#analyze-input");
-  const form = $("#analyze-form");
-  if (!input || !form) return;
-  let text = cutName ? removeCardLine(input.value, cutName) : input.value;
+  if (!ctx) return;
+  const text = cutName ? removeCardLine(ctx.getDecklist(), cutName) : ctx.getDecklist();
   const body = text.replace(/\s*$/, "");
-  input.value = (body ? body + "\n" : "") + `1 ${addName}`;
+  const next = (body ? body + "\n" : "") + `1 ${addName}`;
   showToast(
     cutName
       ? `Swapped ${cutName} → ${addName}. Re-analyzing…`
       : `Added ${addName} — you're at 101. Trim a card to reach 100.`
   );
-  form.requestSubmit();
+  ctx.apply(next);
 }
 
 /* ---------- Cut chooser modal (make room for an upgrade) ------------------ */
@@ -704,7 +715,7 @@ function cutChooserOpen() {
   return !!_cutModal && !_cutModal.overlay.hidden;
 }
 
-function openCutChooser(name, suggestions) {
+function openCutChooser(ctx, name, suggestions) {
   const { overlay, body } = ensureCutModal();
   body.innerHTML = "";
   body.append(el("h3", { class: "cut-chooser__title", text: `Add ${name}` }));
@@ -715,7 +726,7 @@ function openCutChooser(name, suggestions) {
     body.append(el("p", { class: "section-sublabel", text: "Suggested cuts (safest first)" }));
     const list = el("div", { class: "cut-options" });
     for (const s of suggestions) {
-      const btn = el("button", { type: "button", class: "cut-option", onclick: () => applyCut(name, s.name) });
+      const btn = el("button", { type: "button", class: "cut-option", onclick: () => applyCut(ctx, name, s.name) });
       const head = el("span", { class: "cut-option__head" }, [
         el("span", { class: "cut-option__name", text: `Cut ${s.name}` }),
       ]);
@@ -733,7 +744,7 @@ function openCutChooser(name, suggestions) {
   const actions = el("div", { class: "cut-actions" });
   actions.append(el("button", {
     type: "button", class: "cut-action cut-action--secondary",
-    text: "Add without cutting (101)", onclick: () => applyCut(name, null),
+    text: "Add without cutting (101)", onclick: () => applyCut(ctx, name, null),
   }));
   actions.append(el("button", {
     type: "button", class: "cut-action cut-action--ghost",
@@ -980,6 +991,41 @@ async function initBuild() {
 function renderDossier(d) {
   const frag = document.createDocumentFragment();
 
+  // A mutable working copy of the decklist so combo upgrades can be applied in
+  // place (Save, Copy, and the validation panel all read from it). The card
+  // breakdown above the validation reflects the original build.
+  const state = { decklist: d.decklist };
+  let validationBody = null, editedBanner = null, copyTextarea = null, saveHolder = null;
+
+  const rebuildSaveBar = () => {
+    if (!saveHolder) return;
+    saveHolder.innerHTML = "";
+    saveHolder.append(saveBar(state.decklist, { commander: d.commander, bracket: d.bracket }));
+  };
+
+  // Upgrade context for the Weaver: apply() edits the working copy, refreshes
+  // Save/Copy, and re-runs the validation analysis in place.
+  const buildCtx = {
+    getDecklist: () => state.decklist,
+    apply: async (dl) => {
+      state.decklist = dl;
+      if (copyTextarea) copyTextarea.value = dl;
+      rebuildSaveBar();
+      if (editedBanner) editedBanner.hidden = false;
+      if (!validationBody) return;
+      validationBody.innerHTML = "";
+      validationBody.append(loadingNode("Re-analyzing…"));
+      try {
+        const res = await api("/api/analyze", { method: "POST", body: JSON.stringify({ decklist: dl }) });
+        validationBody.innerHTML = "";
+        validationBody.append(renderAnalysis(res, true, buildCtx));
+      } catch (err) {
+        validationBody.innerHTML = "";
+        validationBody.append(el("div", { class: "banner banner--empty", text: err.message }));
+      }
+    },
+  };
+
   // ---- Header ----
   const head = el("div", { class: "build-head" });
   const titleH = el("h2", { class: "build-title" }, [cardLink(d.commander, "card-link--heading")]);
@@ -1003,7 +1049,14 @@ function renderDossier(d) {
     d.notes.forEach((n) => notes.append(el("li", { text: n })));
     head.append(notes);
   }
-  head.append(saveBar(d.decklist, { commander: d.commander, bracket: d.bracket }));
+  saveHolder = el("div", { class: "save-holder" });
+  rebuildSaveBar();
+  const tuneBtn = el("button", {
+    type: "button", class: "btn btn--ghost", text: "Tune in Analyze",
+    title: "Open this deck in the Analyze tab to refine it",
+    onclick: () => sendToAnalyze(state.decklist),
+  });
+  head.append(el("div", { class: "build-actions" }, [saveHolder, tuneBtn]));
   frag.append(head);
 
   // ---- Card groups ----
@@ -1050,13 +1103,21 @@ function renderDossier(d) {
     frag.append(g);
   }
 
-  // ---- Validation summary (collapsed by default) ----
+  // ---- Validation + combo upgrades (editable; opens if a combo is available) ----
   if (d.validation) {
+    const nearMiss = comboNearMissCount(d.validation);
     const details = el("details", { class: "collapsible" });
+    if (nearMiss) details.setAttribute("open", "");
     const worst = worstOfAnalysis(d.validation);
-    details.append(el("summary", { html:
-      `Validation summary &mdash; <span class="muted">built deck self-check (${esc(worst)})</span>` }));
-    details.append(renderAnalysis(d.validation));
+    details.append(el("summary", { html: nearMiss
+      ? `Validation &amp; combo upgrades &mdash; <span class="muted">${nearMiss} one-card-away combo${nearMiss === 1 ? "" : "s"} (${esc(worst)})</span>`
+      : `Validation summary &mdash; <span class="muted">built deck self-check (${esc(worst)})</span>` }));
+    editedBanner = el("div", { class: "banner edited-banner", hidden: "", text:
+      "Decklist edited here — the card breakdown above still reflects the original build. Use Save deck or Copy decklist to keep your changes." });
+    details.append(editedBanner);
+    validationBody = el("div", { class: "validation-body" });
+    validationBody.append(renderAnalysis(d.validation, true, buildCtx));
+    details.append(validationBody);
     frag.append(details);
   }
 
@@ -1064,17 +1125,17 @@ function renderDossier(d) {
   if (d.decklist) {
     const details = el("details", { class: "collapsible" });
     details.append(el("summary", { text: "Full decklist" }));
-    const ta = el("textarea", { class: "textarea", readonly: "", rows: "16", "aria-label": "Full decklist" });
-    ta.value = d.decklist;
-    details.append(ta);
+    copyTextarea = el("textarea", { class: "textarea", readonly: "", rows: "16", "aria-label": "Full decklist" });
+    copyTextarea.value = state.decklist;
+    details.append(copyTextarea);
     const status = el("span", { class: "copy-status", role: "status", "aria-live": "polite" });
     const copyBtn = el("button", { type: "button", class: "btn btn--small", text: "Copy decklist",
       onclick: async () => {
         try {
-          await navigator.clipboard.writeText(d.decklist);
+          await navigator.clipboard.writeText(state.decklist);
           status.textContent = "Copied!";
         } catch {
-          ta.select();
+          copyTextarea.select();
           status.textContent = document.execCommand?.("copy") ? "Copied!" : "Press Ctrl/Cmd+C to copy.";
         }
         setTimeout(() => (status.textContent = ""), 2500);
@@ -1094,6 +1155,22 @@ function worstOfAnalysis(a) {
     if (rank[s.worst_severity] < rank[worst]) worst = s.worst_severity;
   }
   return worst;
+}
+
+/** How many one-card-away combos an analysis payload reports. */
+function comboNearMissCount(a) {
+  const s = (a.sections || []).find((x) => x.title === "Combos & Win Lines");
+  return s && s.data ? (s.data.near_miss_count || 0) : 0;
+}
+
+/** Load a decklist into the Analyze tab and run it (used by build + saved decks). */
+function sendToAnalyze(decklist) {
+  location.hash = "#analyze";
+  // Let the route switch render the Analyze view before filling + submitting.
+  setTimeout(() => {
+    const input = $("#analyze-input");
+    if (input) { input.value = decklist; $("#analyze-form").requestSubmit(); }
+  }, 40);
 }
 
 /* ---------- Shared bits --------------------------------------------------- */
@@ -1185,11 +1262,7 @@ function renderDeckRow(d) {
 async function openSavedDeck(id) {
   try {
     const d = await api(`/api/decks/${id}`);
-    location.hash = "#analyze";
-    setTimeout(() => {
-      const input = $("#analyze-input");
-      if (input) { input.value = d.decklist; $("#analyze-form").requestSubmit(); }
-    }, 40);
+    sendToAnalyze(d.decklist);
   } catch (err) { showToast(err.message); }
 }
 

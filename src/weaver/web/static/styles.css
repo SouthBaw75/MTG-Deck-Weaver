@@ -521,6 +521,12 @@ select.input { cursor: pointer; }
 .cut-action--ghost { background: transparent; color: var(--text-dim); }
 .cut-action--ghost:hover, .cut-action--ghost:focus-visible { color: var(--text); border-color: var(--gold); }
 
+/* Build result: Save + Tune-in-Analyze action row, and edited-state notice. */
+.build-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .9rem; }
+.build-actions .save-holder { display: inline-flex; }
+.validation-body { margin-top: .2rem; }
+.edited-banner { margin: .2rem 0 .6rem; font-size: .85rem; }
+
 /* Card popup modal */
 body.modal-open { overflow: hidden; }
 .modal-overlay {
