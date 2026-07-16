@@ -316,6 +316,9 @@ code {
 /* ---- Forms / inputs ------------------------------------------------------ */
 .field { display: block; margin-bottom: 1.1rem; }
 .field--wide { grid-column: 1 / -1; }
+.field--check { display: flex; align-items: center; gap: 0.6rem; }
+.field--check input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--gold); cursor: pointer; }
+.field--check .field__label { margin: 0; cursor: pointer; }
 .field__label { display: block; font-family: var(--font-display); font-size: 1.02rem; margin-bottom: 0.35rem; color: var(--text); }
 .field__hint { display: block; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 0.45rem; }
 .field__opt { color: var(--text-mute); font-weight: 400; font-family: var(--font-body); font-size: 0.85rem; }

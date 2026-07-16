@@ -56,8 +56,8 @@ INSERT INTO cards (
     legal_commander, legalities, is_game_changer, reserved,
     rarity, set_code, collector_number, released_at, edhrec_rank,
     price_usd, price_usd_foil, price_eur, price_tix,
-    scryfall_id, scryfall_uri
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    scryfall_id, scryfall_uri, games
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
 
@@ -177,6 +177,7 @@ def _card_to_row(card: dict) -> tuple:
         _float_or_none(prices.get("tix")),
         card.get("id"),
         card.get("scryfall_uri"),
+        _json_or_none(card.get("games")),
     )
 
 

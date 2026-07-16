@@ -779,6 +779,7 @@ async function initBuild() {
       bracket: Number($("#build-bracket").value) || 3,
       budget: $("#build-budget").value ? Number($("#build-budget").value) : null,
       theme: themeSelect.value || null,
+      arena_only: $("#build-arena").checked,
     };
 
     out.innerHTML = "";

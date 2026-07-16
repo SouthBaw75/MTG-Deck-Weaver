@@ -54,6 +54,20 @@ def _tags_for(conn: sqlite3.Connection, oracle_id: str) -> dict[str, float]:
     }
 
 
+def _on_arena(row) -> bool:
+    """True if the card is available on MTG Arena (per Scryfall's `games`)."""
+    try:
+        raw = row["games"]
+    except (IndexError, KeyError):
+        return False
+    if not raw:
+        return False
+    try:
+        return "arena" in json.loads(raw)
+    except (ValueError, TypeError):
+        return False
+
+
 def commander_color_identity(commander: Candidate, partner: Candidate | None) -> set[str]:
     ci = set(commander.color_identity)
     if partner:
@@ -92,6 +106,8 @@ def build_pool(conn: sqlite3.Connection, request: BuildRequest) -> tuple[Candida
         if not set(card_ci).issubset(ci):
             continue
         if owned_lower is not None and name.lower() not in owned_lower:
+            continue
+        if request.arena_only and not _on_arena(row):
             continue
         price = row["price_usd"]
         if per_card_cap is not None and price is not None and price > per_card_cap:

@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS cards (
     price_eur        REAL,
     price_tix        REAL,
     scryfall_id      TEXT,
-    scryfall_uri     TEXT
+    scryfall_uri     TEXT,
+    games            TEXT   -- JSON array, e.g. ["paper","mtgo","arena"]
 );
 CREATE INDEX IF NOT EXISTS idx_cards_name ON cards(name);
 CREATE INDEX IF NOT EXISTS idx_cards_edhrec_rank ON cards(edhrec_rank);
@@ -140,9 +141,25 @@ CREATE TABLE IF NOT EXISTS brackets (
 """
 
 
+# Columns added after v1 that must be back-filled onto existing databases
+# (CREATE TABLE IF NOT EXISTS won't add columns to a table that already exists).
+_ADDED_COLUMNS = {
+    "cards": [("games", "TEXT")],
+}
+
+
+def _migrate_columns(conn) -> None:
+    for table, cols in _ADDED_COLUMNS.items():
+        existing = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+        for name, decl in cols:
+            if name not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+
+
 def apply_schema(conn) -> None:
-    """Create all tables/indexes if missing and stamp the schema version."""
+    """Create all tables/indexes if missing, migrate new columns, stamp version."""
     conn.executescript(SCHEMA_SQL)
+    _migrate_columns(conn)
     conn.execute(
         "INSERT INTO meta(key, value) VALUES('schema_version', ?) "
         "ON CONFLICT(key) DO UPDATE SET value = excluded.value",

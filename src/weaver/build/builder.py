@@ -73,5 +73,17 @@ def build_deck(conn: sqlite3.Connection, request: BuildRequest) -> BuildResult:
         result.notes.insert(0, "archetype(s): " + ", ".join(archetype_keys))
     else:
         result.notes.insert(0, "archetype: goodstuff (no strong archetype signal / theme)")
+    if request.arena_only:
+        result.notes.insert(0, "Arena-only: pool restricted to cards available on MTG Arena (for Brawl).")
+        crow = conn.execute(
+            "SELECT games FROM cards WHERE name = ? COLLATE NOCASE", (commander.name,)
+        ).fetchone()
+        from weaver.build.pool import _on_arena
+        if crow is not None and not _on_arena(crow):
+            result.notes.insert(
+                0,
+                f"Heads up: {commander.name} isn't on MTG Arena, so this deck can't be "
+                "imported into Arena Brawl even though the other cards are Arena-legal.",
+            )
     result.notes.append(f"pool size after color/legality/budget filter: {len(pool)}")
     return result

@@ -36,6 +36,7 @@ class BuildBody(BaseModel):
     budget: float | None = None
     theme: str | None = None
     owned: list[str] | None = None
+    arena_only: bool = False
 
 
 class DeckSaveBody(BaseModel):
@@ -151,6 +152,7 @@ def create_app(db_path: str | None = None, decks_db_path: str | None = None) -> 
             commander=body.commander, partner=body.partner, bracket=body.bracket,
             budget=body.budget, theme=body.theme,
             owned=set(body.owned) if body.owned else None,
+            arena_only=body.arena_only,
         )
         try:
             result = build_deck(conn, request)

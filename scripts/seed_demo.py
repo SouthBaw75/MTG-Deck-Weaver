@@ -123,18 +123,33 @@ def main() -> None:
     conn = connect(out)
     apply_schema(conn)
 
+    # Illustrative Arena availability for the demo (real data comes from Scryfall
+    # via `weaver update`). A handful of these staples exist on MTG Arena.
+    ARENA_DEMO = {
+        "Sign in Blood", "Night's Whisper", "Blood Artist", "Grave Titan",
+        "Bitterblossom", "Cathars' Crusade", "Eternal Witness", "Heroic Intervention",
+        "Swords to Plowshares", "Counterspell", "Meren of Clan Nel Toth",
+    }
+
+    def games_for(name: str) -> str:
+        g = ["paper", "mtgo"]
+        if name in ARENA_DEMO:
+            g.append("arena")
+        return json.dumps(g)
+
     for i, (name, mc, mv, tl, txt, ci, rank, price, gc) in enumerate(CARDS):
         conn.execute(
             "INSERT INTO cards(oracle_id,name,mana_cost,mana_value,type_line,oracle_text,"
-            "color_identity,legal_commander,is_game_changer,edhrec_rank,price_usd)"
-            " VALUES(?,?,?,?,?,?,?,'legal',?,?,?)",
-            (f"demo-{i}", name, mc, mv, tl, txt, json.dumps(ci), gc, rank, price),
+            "color_identity,legal_commander,is_game_changer,edhrec_rank,price_usd,games)"
+            " VALUES(?,?,?,?,?,?,?,'legal',?,?,?,?)",
+            (f"demo-{i}", name, mc, mv, tl, txt, json.dumps(ci), gc, rank, price, games_for(name)),
         )
     for b, c in BASICS:
         conn.execute(
             "INSERT INTO cards(oracle_id,name,mana_cost,mana_value,type_line,oracle_text,"
-            "color_identity,legal_commander,is_game_changer) VALUES(?,?,'',0,?,?,?,'legal',0)",
-            (f"basic-{b}", b, f"Basic Land — {b}", f"({{T}}: Add {{{c}}}.)", json.dumps([c])),
+            "color_identity,legal_commander,is_game_changer,games) VALUES(?,?,'',0,?,?,?,'legal',0,?)",
+            (f"basic-{b}", b, f"Basic Land — {b}", f"({{T}}: Add {{{c}}}.)", json.dumps([c]),
+             json.dumps(["paper", "mtgo", "arena"])),
         )
 
     for cid, names, produces, ci in COMBOS:

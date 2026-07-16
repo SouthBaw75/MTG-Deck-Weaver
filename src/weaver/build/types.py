@@ -21,6 +21,7 @@ class BuildRequest:
     owned: set[str] | None = None        # restrict pool to these names, None = all
     land_count: int | None = None        # override the template's land count
     seed_cards: list[str] = field(default_factory=list)  # must-include names
+    arena_only: bool = False             # restrict to cards available on MTG Arena
 
 
 @dataclass

@@ -270,8 +270,9 @@ def tags(ctx: click.Context, tag_name: str | None, top_n: int):
 @click.option("--out", "out_path", default=None, type=click.Path(dir_okay=False),
               help="Write the built decklist to this file")
 @click.option("--validate/--no-validate", default=True, help="Run the analyzer on the built deck")
+@click.option("--arena", is_flag=True, help="Restrict to cards available on MTG Arena (for Brawl)")
 @click.pass_context
-def build(ctx: click.Context, commander, partner, bracket, budget, theme, owned, out_path, validate):
+def build(ctx: click.Context, commander, partner, bracket, budget, theme, owned, out_path, validate, arena):
     """Build a tuned Commander deck around a commander."""
     from weaver.build.builder import build_deck
     from weaver.build.dossier import render_dossier
@@ -290,7 +291,7 @@ def build(ctx: click.Context, commander, partner, bracket, budget, theme, owned,
 
     request = BuildRequest(
         commander=commander, partner=partner, bracket=bracket,
-        budget=budget, theme=theme, owned=owned_set,
+        budget=budget, theme=theme, owned=owned_set, arena_only=arena,
     )
     try:
         result = build_deck(conn, request)
