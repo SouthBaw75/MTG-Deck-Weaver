@@ -493,6 +493,26 @@ select.input { cursor: pointer; }
 .combo-add__desc { color: var(--text-dim); font-size: .85rem; }
 .combo-add__produces { color: var(--text); }
 
+/* Arena legality badges on combo upgrades. */
+.arena-badge {
+  flex: none; font-size: .7rem; font-weight: 600; letter-spacing: .03em;
+  padding: .1rem .45rem; border-radius: 999px; border: 1px solid transparent; white-space: nowrap;
+}
+.arena-badge--ok {
+  color: #6ee7a0; border-color: color-mix(in srgb, #6ee7a0 45%, transparent);
+  background: color-mix(in srgb, #6ee7a0 12%, transparent);
+}
+.arena-badge--no {
+  color: #f19a9a; border-color: color-mix(in srgb, #f19a9a 45%, transparent);
+  background: color-mix(in srgb, #f19a9a 12%, transparent);
+}
+.combo-add__btn--illegal {
+  border-color: color-mix(in srgb, #f19a9a 55%, var(--border));
+  background: color-mix(in srgb, #f19a9a 10%, var(--bg-2));
+}
+.combo-add__btn--illegal strong { color: #f19a9a; }
+.cut-chooser__warn { margin: 0 0 .6rem; font-size: .85rem; }
+
 /* Cut chooser modal: pick a card to remove when accepting an upgrade. */
 .cut-modal { max-width: 34rem; }
 .cut-chooser__title { margin: 0 2rem .3rem 0; font-size: 1.15rem; }

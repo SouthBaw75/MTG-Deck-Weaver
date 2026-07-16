@@ -29,7 +29,10 @@ def analyze(deck) -> AnalysisSection:
         {"id": m.combo_id, "cards": m.cards, "produces": m.produces} for m in present
     ]
     section.data["near_miss"] = [
-        {"id": m.combo_id, "cards": m.cards, "missing": m.missing, "produces": m.produces}
+        {
+            "id": m.combo_id, "cards": m.cards, "missing": m.missing,
+            "produces": m.produces, "arena_legal": m.missing_arena,
+        }
         for m in near
     ]
 

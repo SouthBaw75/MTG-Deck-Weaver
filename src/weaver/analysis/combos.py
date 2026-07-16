@@ -25,6 +25,9 @@ class ComboMatch:
     color_identity: list[str]
     spellbook_uri: str
     missing: list[str] = field(default_factory=list)  # empty => fully present
+    # For a near-miss: is the single missing card available on MTG Arena?
+    # None = not queried (present combos, or no DB lookup done).
+    missing_arena: bool | None = None
 
     @property
     def is_present(self) -> bool:
@@ -124,6 +127,26 @@ def load_combo_index(conn: sqlite3.Connection, deck_card_names: set[str]) -> lis
     return out
 
 
+def _card_on_arena(conn: sqlite3.Connection, name: str) -> bool:
+    """Whether a card is available on MTG Arena (per Scryfall's `games`).
+    Tolerant of DFC/split half-names, so combo pieces resolve like the loader."""
+    row = conn.execute(
+        "SELECT games FROM cards WHERE name = ? COLLATE NOCASE", (name,)
+    ).fetchone()
+    if row is None:
+        row = conn.execute(
+            "SELECT games FROM cards WHERE name LIKE ? COLLATE NOCASE "
+            "AND name LIKE '% // %' ORDER BY length(name) LIMIT 1",
+            (f"{name} // %",),
+        ).fetchone()
+    if row is None or not row["games"]:
+        return False
+    try:
+        return "arena" in json.loads(row["games"])
+    except (ValueError, TypeError):
+        return False
+
+
 def detect_deck_combos(conn: sqlite3.Connection, deck) -> tuple[list[ComboMatch], list[ComboMatch]]:
     """Convenience: pull the combo index for a DeckView and match it."""
     names = {c.name for c in deck.cards}
@@ -131,4 +154,10 @@ def detect_deck_combos(conn: sqlite3.Connection, deck) -> tuple[list[ComboMatch]
         letter for c in deck.commanders for letter in (c.color_identity or [])
     }
     combos = load_combo_index(conn, names)
-    return match_combos(names, combos, deck_color_identity=deck_ci or None)
+    present, near = match_combos(names, combos, deck_color_identity=deck_ci or None)
+    # Annotate each near-miss with whether its single missing card is on Arena,
+    # so an Arena-legal deck can be warned before adding an off-Arena upgrade.
+    for m in near:
+        if m.missing:
+            m.missing_arena = _card_on_arena(conn, m.missing[0])
+    return present, near

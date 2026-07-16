@@ -214,7 +214,7 @@ document.addEventListener("click", (e) => {
     // The editable analysis that owns this button carries its own context
     // (Analyze input, or a Weaver-built deck's working copy).
     const ctx = addBtn.closest(".analysis")?.__weaverCtx;
-    if (ctx) beginComboUpgrade(ctx, addBtn.getAttribute("data-add-card"));
+    if (ctx) beginComboUpgrade(ctx, addBtn.getAttribute("data-add-card"), addBtn.hasAttribute("data-arena-illegal"));
     return;
   }
   const link = e.target.closest(".card-link[data-card]");
@@ -494,9 +494,20 @@ function initAnalyze() {
   const input = $("#analyze-input");
   const btn = $("#analyze-btn");
   const out = $("#analyze-result");
+  const arena = $("#analyze-arena");
 
   if (form.dataset.ready) return;
   form.dataset.ready = "1";
+
+  // Remember the Arena preference across visits.
+  if (arena) {
+    arena.checked = localStorage.getItem("weaver.analyze.arena") === "1";
+    arena.addEventListener("change", () => {
+      localStorage.setItem("weaver.analyze.arena", arena.checked ? "1" : "0");
+      // Re-render the current analysis so combo badges appear/disappear.
+      if (input.value.trim() && out.querySelector(".analysis")) form.requestSubmit();
+    });
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -513,8 +524,9 @@ function initAnalyze() {
       const ctx = {
         getDecklist: () => input.value,
         apply: (dl) => { input.value = dl; form.requestSubmit(); },
+        arena: !!(arena && arena.checked),
       };
-      out.append(renderAnalysis(result, true, ctx));
+      out.append(renderAnalysis(result, true, ctx, ctx.arena));
     } catch (err) {
       out.innerHTML = "";
       out.append(el("div", { class: "banner banner--empty", text: err.message }));
@@ -529,7 +541,7 @@ function initAnalyze() {
  *  ({getDecklist, apply}) that the "+ Add" buttons act on. Attached to the root
  *  so the document-level click handler can find it (works in Analyze and in a
  *  Weaver-built deck's validation panel alike). */
-function renderAnalysis(a, editable = false, ctx = null) {
+function renderAnalysis(a, editable = false, ctx = null, arena = false) {
   const frag = el("div", { class: "analysis" });
   if (editable && ctx) frag.__weaverCtx = ctx;
 
@@ -551,12 +563,12 @@ function renderAnalysis(a, editable = false, ctx = null) {
   frag.append(head);
 
   // Sections
-  for (const section of a.sections || []) frag.append(renderSection(section, editable));
+  for (const section of a.sections || []) frag.append(renderSection(section, editable, arena));
   return frag;
 }
 
 /** One analysis section card, colored by worst_severity, with findings + charts. */
-function renderSection(section, editable = false) {
+function renderSection(section, editable = false, arena = false) {
   const node = el("section", { class: "asection", dataset: { sev: section.worst_severity || "info" } });
   node.append(el("h3", { class: "asection__title", text: section.title }));
 
@@ -577,38 +589,54 @@ function renderSection(section, editable = false) {
   if (section.title === "Mana Base") appendManaCharts(node, data);
   else if (section.title === "Role Coverage") appendRoleChart(node, data);
   else if (section.title === "Consistency") appendConsistencyChart(node, data);
-  else if (section.title === "Combos & Win Lines") appendComboCards(node, data, editable);
+  else if (section.title === "Combos & Win Lines") appendComboCards(node, data, editable, arena);
   else if (section.title === "Synergy") appendSynergyCards(node, data);
 
   return node;
 }
 
 /** Combos section: actionable "one card away" upgrades (Analyze view only),
- *  then clickable card chips for every card named in the section. */
-function appendComboCards(node, data, editable = false) {
+ *  then clickable card chips for every card named in the section. When `arena`
+ *  is set, each upgrade is badged on/off MTG Arena so the deck stays legal. */
+function appendComboCards(node, data, editable = false, arena = false) {
   const near = data.near_miss || [];
 
   // When we have an editable decklist in scope, offer one-click completion of
   // each near-miss combo: add the single missing card and re-analyze.
   if (editable && near.length) {
     const wrap = el("div", { class: "combo-adds" });
-    wrap.append(el("p", { class: "section-sublabel", text: "Complete a combo — add the missing card" }));
+    const label = arena
+      ? "Complete a combo — add the missing card (Arena legality shown)"
+      : "Complete a combo — add the missing card";
+    wrap.append(el("p", { class: "section-sublabel", text: label }));
     for (const c of near) {
       const missing = (c.missing || [])[0];
       if (!missing) continue;
       const have = (c.cards || []).filter((n) => n !== missing);
       const produces = (c.produces && c.produces.length) ? c.produces.join(", ") : "a combo result";
+      // arena_legal: true=on Arena, false=not, null/undefined=unknown.
+      const onArena = c.arena_legal === true;
+      const offArena = arena && c.arena_legal === false;
       const btn = el("button", {
         type: "button",
-        class: "combo-add__btn",
+        class: "combo-add__btn" + (offArena ? " combo-add__btn--illegal" : ""),
         "data-add-card": missing,
-        title: `Add ${missing} to the decklist and re-analyze`,
+        title: offArena
+          ? `${missing} is not on MTG Arena — adding it makes the deck illegal for Arena`
+          : `Add ${missing} to the decklist and re-analyze`,
+        ...(offArena ? { "data-arena-illegal": "1" } : {}),
       }, [document.createTextNode("+ Add "), el("strong", { text: missing })]);
-      const desc = el("span", { class: "combo-add__desc" }, [
+      const row = el("div", { class: "combo-add" }, [btn]);
+      if (arena) {
+        row.append(onArena
+          ? el("span", { class: "arena-badge arena-badge--ok", text: "On Arena" })
+          : el("span", { class: "arena-badge arena-badge--no", text: "Not on Arena" }));
+      }
+      row.append(el("span", { class: "combo-add__desc" }, [
         document.createTextNode(have.length ? `pairs with ${have.join(" + ")} → ` : `→ `),
         el("span", { class: "combo-add__produces", text: produces }),
-      ]);
-      wrap.append(el("div", { class: "combo-add" }, [btn, desc]));
+      ]));
+      wrap.append(row);
     }
     node.append(wrap);
   }
@@ -652,7 +680,7 @@ function removeCardLine(text, name) {
 /** Accept a combo upgrade in the given context: fetch cut candidates, then let
  *  the user choose how to make room (swap one out, or add anyway). `ctx` is
  *  {getDecklist, apply} — the Analyze textarea or a Weaver deck's working copy. */
-async function beginComboUpgrade(ctx, name) {
+async function beginComboUpgrade(ctx, name, arenaWarn = false) {
   if (!ctx) return;
   const decklist = ctx.getDecklist();
   if (cardInList(decklist, name)) {
@@ -669,7 +697,7 @@ async function beginComboUpgrade(ctx, name) {
   } catch (_err) {
     /* No suggestions available — the chooser still offers "add anyway". */
   }
-  openCutChooser(ctx, name, suggestions);
+  openCutChooser(ctx, name, suggestions, arenaWarn);
 }
 
 /** Apply the user's choice: optionally cut `cutName`, add `addName`, re-analyze
@@ -715,10 +743,14 @@ function cutChooserOpen() {
   return !!_cutModal && !_cutModal.overlay.hidden;
 }
 
-function openCutChooser(ctx, name, suggestions) {
+function openCutChooser(ctx, name, suggestions, arenaWarn = false) {
   const { overlay, body } = ensureCutModal();
   body.innerHTML = "";
   body.append(el("h3", { class: "cut-chooser__title", text: `Add ${name}` }));
+  if (arenaWarn) {
+    body.append(el("div", { class: "banner cut-chooser__warn", text:
+      `⚠ ${name} is not on MTG Arena. Adding it will make this deck illegal to import into Arena (Brawl). You can still add it for a paper/Commander build.` }));
+  }
   body.append(el("p", { class: "cut-chooser__lead", text:
     `A Commander deck is exactly 100 cards. Pick one to cut so ${name} has a slot — or add it anyway and trim later.` }));
 
@@ -995,6 +1027,7 @@ function renderDossier(d) {
   // place (Save, Copy, and the validation panel all read from it). The card
   // breakdown above the validation reflects the original build.
   const state = { decklist: d.decklist };
+  const builtArena = !!d.arena_only;  // badge combo upgrades for Arena legality
   let validationBody = null, editedBanner = null, copyTextarea = null, saveHolder = null;
 
   const rebuildSaveBar = () => {
@@ -1007,6 +1040,7 @@ function renderDossier(d) {
   // Save/Copy, and re-runs the validation analysis in place.
   const buildCtx = {
     getDecklist: () => state.decklist,
+    arena: builtArena,
     apply: async (dl) => {
       state.decklist = dl;
       if (copyTextarea) copyTextarea.value = dl;
@@ -1018,7 +1052,7 @@ function renderDossier(d) {
       try {
         const res = await api("/api/analyze", { method: "POST", body: JSON.stringify({ decklist: dl }) });
         validationBody.innerHTML = "";
-        validationBody.append(renderAnalysis(res, true, buildCtx));
+        validationBody.append(renderAnalysis(res, true, buildCtx, builtArena));
       } catch (err) {
         validationBody.innerHTML = "";
         validationBody.append(el("div", { class: "banner banner--empty", text: err.message }));
@@ -1116,7 +1150,7 @@ function renderDossier(d) {
       "Decklist edited here — the card breakdown above still reflects the original build. Use Save deck or Copy decklist to keep your changes." });
     details.append(editedBanner);
     validationBody = el("div", { class: "validation-body" });
-    validationBody.append(renderAnalysis(d.validation, true, buildCtx));
+    validationBody.append(renderAnalysis(d.validation, true, buildCtx, builtArena));
     details.append(validationBody);
     frag.append(details);
   }

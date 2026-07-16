@@ -88,6 +88,7 @@ def build_result_to_dict(result: BuildResult) -> dict:
         "partner": result.partner.name if result.partner else None,
         "bracket": result.request.bracket,
         "budget": result.request.budget,
+        "arena_only": result.request.arena_only,
         "spent_usd": round(spent, 2),
         "total_cards": result.total_cards,
         "notes": [strip_markup(n) for n in result.notes],
