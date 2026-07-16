@@ -234,6 +234,7 @@ document.addEventListener("keydown", (e) => {
 // Single Escape handler for the layered overlays (topmost first).
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
+  if (cutChooserOpen()) { closeCutChooser(); return; }
   if (imgLightboxOpen()) { closeImgLightbox(); return; }
   if (_modal && !_modal.overlay.hidden) { closeCardModal(); return; }
 });
@@ -609,21 +610,147 @@ function appendComboCards(node, data, editable = false) {
   appendCardChipRow(node, names);
 }
 
-/** Append `1 <name>` to the Analyze decklist and re-run the analysis. */
-function addCardToAnalysis(name) {
+/** A decklist line's card name, stripped of a leading "1 " / "2x " quantity. */
+const cardNameOfLine = (line) => line.replace(/^\s*\d+\s*x?\s*/i, "").trim();
+
+/** Is `name` already present in the decklist text (any quantity)? */
+function cardInList(text, name) {
+  const target = name.toLowerCase();
+  return text.split("\n").some((l) => l.trim() && cardNameOfLine(l).toLowerCase() === target);
+}
+
+/** Remove one copy of `name` from the decklist text (decrement qty if >1). */
+function removeCardLine(text, name) {
+  const target = name.toLowerCase();
+  const out = [];
+  let removed = false;
+  for (const line of text.split("\n")) {
+    if (!removed && line.trim() && cardNameOfLine(line).toLowerCase() === target) {
+      const m = line.match(/^(\s*)(\d+)\s*x?\s+(.*)$/i);
+      const qty = m ? parseInt(m[2], 10) : 1;
+      if (m && qty > 1) out.push(`${m[1]}${qty - 1} ${m[3].trim()}`);
+      removed = true;
+      continue;
+    }
+    out.push(line);
+  }
+  return out.join("\n");
+}
+
+/** Accept a combo upgrade: fetch cut candidates, then let the user choose how
+ *  to make room (swap one out, or add anyway) before re-analyzing. */
+async function addCardToAnalysis(name) {
   const input = $("#analyze-input");
   const form = $("#analyze-form");
   if (!input || !form) return;
-  const norm = (s) => s.replace(/^\s*\d+\s*x?\s*/i, "").trim().toLowerCase();
-  const already = input.value.split("\n").some((l) => l.trim() && norm(l) === name.toLowerCase());
-  if (already) {
+  if (cardInList(input.value, name)) {
     showToast(`${name} is already in the decklist.`);
     return;
   }
-  const body = input.value.replace(/\s*$/, "");
-  input.value = (body ? body + "\n" : "") + `1 ${name}`;
-  showToast(`Added ${name} — re-analyzing. Cut a card to stay at 100.`);
+  let suggestions = [];
+  try {
+    const r = await api("/api/cut-suggestions", {
+      method: "POST",
+      body: JSON.stringify({ decklist: input.value, adding: name, count: 5 }),
+    });
+    suggestions = r.suggestions || [];
+  } catch (_err) {
+    /* No suggestions available — the chooser still offers "add anyway". */
+  }
+  openCutChooser(name, suggestions);
+}
+
+/** Apply the user's choice: optionally cut `cutName`, add `addName`, re-analyze. */
+function applyCut(addName, cutName) {
+  closeCutChooser();
+  const input = $("#analyze-input");
+  const form = $("#analyze-form");
+  if (!input || !form) return;
+  let text = cutName ? removeCardLine(input.value, cutName) : input.value;
+  const body = text.replace(/\s*$/, "");
+  input.value = (body ? body + "\n" : "") + `1 ${addName}`;
+  showToast(
+    cutName
+      ? `Swapped ${cutName} → ${addName}. Re-analyzing…`
+      : `Added ${addName} — you're at 101. Trim a card to reach 100.`
+  );
   form.requestSubmit();
+}
+
+/* ---------- Cut chooser modal (make room for an upgrade) ------------------ */
+let _cutModal = null;
+
+function ensureCutModal() {
+  if (_cutModal) return _cutModal;
+  const body = el("div", { class: "modal__body cut-chooser" });
+  const closeBtn = el("button", {
+    type: "button", class: "modal__close", "aria-label": "Close", html: "&times;",
+    onclick: closeCutChooser,
+  });
+  const dialog = el("div", {
+    class: "modal cut-modal", role: "dialog", "aria-modal": "true",
+    "aria-label": "Choose a card to cut",
+  }, [closeBtn, body]);
+  const overlay = el("div", {
+    class: "modal-overlay", hidden: "",
+    onclick: (e) => { if (e.target === overlay) closeCutChooser(); },
+  }, [dialog]);
+  document.body.append(overlay);
+  _cutModal = { overlay, body };
+  return _cutModal;
+}
+
+function cutChooserOpen() {
+  return !!_cutModal && !_cutModal.overlay.hidden;
+}
+
+function openCutChooser(name, suggestions) {
+  const { overlay, body } = ensureCutModal();
+  body.innerHTML = "";
+  body.append(el("h3", { class: "cut-chooser__title", text: `Add ${name}` }));
+  body.append(el("p", { class: "cut-chooser__lead", text:
+    `A Commander deck is exactly 100 cards. Pick one to cut so ${name} has a slot — or add it anyway and trim later.` }));
+
+  if (suggestions.length) {
+    body.append(el("p", { class: "section-sublabel", text: "Suggested cuts (safest first)" }));
+    const list = el("div", { class: "cut-options" });
+    for (const s of suggestions) {
+      const btn = el("button", { type: "button", class: "cut-option", onclick: () => applyCut(name, s.name) });
+      const head = el("span", { class: "cut-option__head" }, [
+        el("span", { class: "cut-option__name", text: `Cut ${s.name}` }),
+      ]);
+      if (s.mv_label) head.append(el("span", { class: "cut-option__mv", text: `MV ${s.mv_label}` }));
+      btn.append(head);
+      btn.append(el("span", { class: "cut-option__reason", text: s.reason }));
+      list.append(btn);
+    }
+    body.append(list);
+  } else {
+    body.append(el("p", { class: "cut-chooser__none", text:
+      "No automatic cut to suggest — combo pieces and cards holding up a needed role are protected. You can add it anyway and remove a card yourself." }));
+  }
+
+  const actions = el("div", { class: "cut-actions" });
+  actions.append(el("button", {
+    type: "button", class: "cut-action cut-action--secondary",
+    text: "Add without cutting (101)", onclick: () => applyCut(name, null),
+  }));
+  actions.append(el("button", {
+    type: "button", class: "cut-action cut-action--ghost",
+    text: "Cancel", onclick: closeCutChooser,
+  }));
+  body.append(actions);
+
+  overlay.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeCutChooser() {
+  if (!cutChooserOpen()) return;
+  _cutModal.overlay.hidden = true;
+  if (!imgLightboxOpen() && (!_modal || _modal.overlay.hidden)) {
+    document.body.classList.remove("modal-open");
+  }
 }
 
 /** Clickable card chips for every card named in the synergy section. */

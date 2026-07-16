@@ -493,6 +493,34 @@ select.input { cursor: pointer; }
 .combo-add__desc { color: var(--text-dim); font-size: .85rem; }
 .combo-add__produces { color: var(--text); }
 
+/* Cut chooser modal: pick a card to remove when accepting an upgrade. */
+.cut-modal { max-width: 34rem; }
+.cut-chooser__title { margin: 0 2rem .3rem 0; font-size: 1.15rem; }
+.cut-chooser__lead { color: var(--text-dim); font-size: .9rem; margin: 0 0 .4rem; }
+.cut-chooser__none { color: var(--text-dim); font-size: .9rem; margin: .6rem 0; }
+.cut-options { display: flex; flex-direction: column; gap: .4rem; margin: .3rem 0 .2rem; }
+.cut-option {
+  display: flex; flex-direction: column; gap: .15rem; text-align: left; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg-2); border-radius: 8px;
+  padding: .5rem .7rem; transition: border-color .12s, background .12s;
+}
+.cut-option:hover, .cut-option:focus-visible {
+  border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--bg-2));
+}
+.cut-option__head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
+.cut-option__name { font-weight: 600; }
+.cut-option__mv { flex: none; color: var(--text-dim); font-size: .75rem; }
+.cut-option__reason { color: var(--text-dim); font-size: .82rem; }
+.cut-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .9rem; }
+.cut-action {
+  cursor: pointer; border-radius: 8px; padding: .45rem .8rem; font-size: .88rem;
+  border: 1px solid var(--border); background: var(--bg-2); color: var(--text);
+}
+.cut-action--secondary { border-color: color-mix(in srgb, var(--gold) 45%, var(--border)); }
+.cut-action--secondary:hover, .cut-action--secondary:focus-visible { border-color: var(--gold); }
+.cut-action--ghost { background: transparent; color: var(--text-dim); }
+.cut-action--ghost:hover, .cut-action--ghost:focus-visible { color: var(--text); border-color: var(--gold); }
+
 /* Card popup modal */
 body.modal-open { overflow: hidden; }
 .modal-overlay {

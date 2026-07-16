@@ -126,6 +126,24 @@ def test_analyze(client):
     assert all("[" not in f["message"] for s in body["sections"] for f in s["findings"])
 
 
+def test_cut_suggestions(client):
+    # Cultivate is a lone ramp card holding up an under-filled role -> protected;
+    # the added card and commander are never suggested.
+    decklist = ("Commander\n1 Tovolar, Dire Overlord\nDeck\n"
+                "1 Sol Ring\n1 Lightning Bolt\n1 Cultivate\n30 Forest\n30 Mountain\n")
+    r = client.post("/api/cut-suggestions",
+                    json={"decklist": decklist, "adding": "Cultivate", "count": 5})
+    assert r.status_code == 200
+    body = r.json()
+    assert "suggestions" in body
+    names = [s["name"] for s in body["suggestions"]]
+    assert "Tovolar, Dire Overlord" not in names  # commander protected
+    assert "Forest" not in names and "Mountain" not in names  # lands protected
+    assert len(body["suggestions"]) <= 5
+    for s in body["suggestions"]:
+        assert set(s) >= {"name", "reason", "mv", "mv_label", "type_line"}
+
+
 def test_build(client):
     r = client.post("/api/build", json={"commander": "Tovolar, Dire Overlord", "bracket": 3})
     assert r.status_code == 200

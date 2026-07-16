@@ -29,6 +29,12 @@ class AnalyzeBody(BaseModel):
     decklist: str
 
 
+class CutSuggestBody(BaseModel):
+    decklist: str
+    adding: str | None = None
+    count: int = 5
+
+
 class BuildBody(BaseModel):
     commander: str
     partner: str | None = None
@@ -138,6 +144,20 @@ def create_app(db_path: str | None = None, decks_db_path: str | None = None) -> 
         _require_cards(conn)
         deck = load_deck(conn, body.decklist)
         return analysis_to_dict(deck, analyze_deck(deck))
+
+    @app.post("/api/cut-suggestions")
+    def cut_suggestions(body: CutSuggestBody):
+        """Rank safe-to-cut cards for a decklist, so accepting an upgrade can
+        keep the deck at 100. Protects commanders, lands, combo pieces, and
+        role-critical cards; see weaver.analysis.cuts."""
+        from weaver.analysis.cuts import suggest_cuts
+        from weaver.analysis.loader import load_deck
+
+        conn = db()
+        _require_cards(conn)
+        deck = load_deck(conn, body.decklist)
+        count = max(1, min(10, body.count))
+        return {"suggestions": suggest_cuts(deck, adding=body.adding, count=count)}
 
     @app.post("/api/build")
     def build(body: BuildBody):
