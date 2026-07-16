@@ -533,6 +533,18 @@ select.input { cursor: pointer; }
 .replace-all-btn { margin-top: .7rem; padding: .3rem .7rem; font-size: .82rem; }
 .modal-actions { margin-top: 1rem; display: flex; justify-content: flex-end; gap: .5rem; }
 
+/* Unresolved-cards diagnostic panel. */
+.unresolved-panel {
+  border-color: color-mix(in srgb, var(--sev-warn, #d9a441) 50%, var(--border));
+  background: color-mix(in srgb, var(--sev-warn, #d9a441) 10%, transparent);
+}
+.unresolved-panel__lead { margin: 0 0 .5rem; font-size: .9rem; }
+.unresolved-list { list-style: none; margin: 0 0 .6rem; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+.unresolved-list li { font-size: .88rem; line-height: 1.4; }
+.unresolved-name { font-weight: 600; }
+.unresolved-reason { color: var(--text-dim); }
+.unresolved-copy { margin-top: .2rem; }
+
 /* Cut chooser modal: pick a card to remove when accepting an upgrade. */
 .cut-modal { max-width: 34rem; }
 .cut-chooser__title { margin: 0 2rem .3rem 0; font-size: 1.15rem; }

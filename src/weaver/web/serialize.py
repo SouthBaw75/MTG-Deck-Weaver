@@ -46,6 +46,7 @@ def analysis_to_dict(deck, sections: list[AnalysisSection]) -> dict:
         "total_cards": deck.total_cards,
         "land_count": deck.land_count,
         "unresolved": list(deck.unresolved),
+        "unresolved_detail": list(getattr(deck, "unresolved_detail", []) or []),
         "off_arena": off_arena,
         "sections": [section_to_dict(s) for s in sections],
     }

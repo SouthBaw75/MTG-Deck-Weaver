@@ -135,6 +135,9 @@ class DeckCard:
 class DeckView:
     cards: list[DeckCard]
     unresolved: list[str] = field(default_factory=list)
+    # Per-unresolved-card diagnostics {name, reason, suggestion} — why the card
+    # didn't match and the closest thing in the database, for investigation.
+    unresolved_detail: list = field(default_factory=list)
     # Populated by the loader when a combo database is available; each item is
     # a weaver.analysis.combos.ComboMatch. Analyzers treat these as read-only.
     combos_present: list = field(default_factory=list)

@@ -61,6 +61,35 @@ def test_loader_resolves_and_flags_arena(db_path):
     conn.close()
 
 
+def test_unresolved_diagnostics(db_path):
+    conn = connect(db_path)
+    # Front Only exists -> a small typo should suggest it; a nonsense name won't.
+    deck = load_deck(conn, "Deck\n1 Front Onlyx\n1 Totally Nonexistent Xyzzy\n")
+    detail = {d["name"]: d for d in deck.unresolved_detail}
+    assert detail["Front Onlyx"]["suggestion"] == "Front Only"       # first-word fallback
+    assert "closest match" in detail["Front Onlyx"]["reason"]
+    assert detail["Totally Nonexistent Xyzzy"]["suggestion"] is None
+    assert "not in the card database" in detail["Totally Nonexistent Xyzzy"]["reason"]
+    conn.close()
+
+
+def test_unresolved_multiface_reason(db_path):
+    conn = connect(db_path)
+    deck = load_deck(conn, "Deck\n1 Made Up Front // Made Up Back\n")
+    d = deck.unresolved_detail[0]
+    assert d["suggestion"] is None
+    assert "multi-face" in d["reason"]
+    conn.close()
+
+
+def test_payload_includes_unresolved_detail(db_path, tmp_path):
+    client = TestClient(create_app(str(db_path), decks_db_path=str(tmp_path / "d.db")))
+    r = client.post("/api/analyze", json={"decklist": "Deck\n1 Front Onlyx\n"})
+    assert r.status_code == 200
+    detail = r.json()["unresolved_detail"]
+    assert detail and detail[0]["name"] == "Front Onlyx" and detail[0]["suggestion"] == "Front Only"
+
+
 def test_api_card_resolves_combined_name(db_path, tmp_path):
     client = TestClient(create_app(str(db_path), decks_db_path=str(tmp_path / "d.db")))
     # Query-param form handles the "//" in the name (a path segment can't).

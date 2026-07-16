@@ -585,13 +585,40 @@ function renderAnalysis(a, editable = false, ctx = null, arena = false) {
   head.append(el("p", { class: "meta", html:
     `<strong>${fmtNum(a.total_cards)}</strong> cards &middot; <strong>${fmtNum(a.land_count)}</strong> lands` }));
   if (a.unresolved && a.unresolved.length) {
-    const banner = el("div", { class: "banner banner--empty", style: "margin-top:.8rem" },
-      [document.createTextNode(`Unresolved (${a.unresolved.length}): `)]);
-    a.unresolved.forEach((n, i) => {
-      if (i) banner.append(document.createTextNode(", "));
-      banner.append(cardLink(n));
-    });
-    head.append(banner);
+    const detail = (a.unresolved_detail && a.unresolved_detail.length)
+      ? a.unresolved_detail
+      : a.unresolved.map((n) => ({ name: n, reason: "not matched to the database", suggestion: null }));
+    const panel = el("div", { class: "banner unresolved-panel", style: "margin-top:.8rem" });
+    panel.append(el("p", { class: "unresolved-panel__lead", text:
+      `⚠ ${detail.length} card(s) couldn't be matched to your database — a typo, missing data (run \`weaver update\`), or possibly a bug worth reporting.` }));
+    const list = el("ul", { class: "unresolved-list" });
+    for (const d of detail) {
+      const li = el("li", {}, [el("span", { class: "unresolved-name", text: `“${d.name}”` })]);
+      if (d.reason) li.append(el("span", { class: "unresolved-reason", text: ` — ${d.reason}` }));
+      if (d.suggestion) {
+        li.append(document.createTextNode(" · closest: "));
+        li.append(cardLink(d.suggestion, "unresolved-sugg"));
+        if (editable && ctx) {
+          li.append(el("button", {
+            type: "button", class: "replace-btn", title: `Use ${d.suggestion} instead`,
+            onclick: () => applyReplace(ctx, d.name, d.suggestion),
+          }, [document.createTextNode("↔ Use")]));
+        }
+      }
+      list.append(li);
+    }
+    panel.append(list);
+    panel.append(el("button", {
+      type: "button", class: "btn btn--small unresolved-copy",
+      onclick: async (e) => {
+        const txt = "Unresolved cards (Deck Weaver):\n" + detail.map((d) =>
+          `- "${d.name}" — ${d.reason}${d.suggestion ? ` (closest: ${d.suggestion})` : ""}`).join("\n");
+        try { await navigator.clipboard.writeText(txt); e.target.textContent = "Copied!"; }
+        catch { e.target.textContent = "Press Ctrl/Cmd+C"; }
+        setTimeout(() => { e.target.textContent = "Copy list to investigate"; }, 2000);
+      },
+    }, [document.createTextNode("Copy list to investigate")]));
+    head.append(panel);
   }
   // Arena legality of the deck itself (only when the deck is flagged as Arena).
   if (arena && a.off_arena && a.off_arena.length) {

@@ -61,14 +61,46 @@ def _resolve_row(conn: sqlite3.Connection, name: str):
     return None
 
 
+def _diagnose_unresolved(conn: sqlite3.Connection, name: str) -> dict:
+    """Explain why a card didn't match and point at the closest thing we have,
+    so the user (or a maintainer) can tell a typo from a data gap from a bug."""
+    # Fuzzy suggestion: match on the significant leading token (pre-comma,
+    # front face), then fall back to just the first word so a small typo like
+    # "Sol Rng" still points at "Sol Ring".
+    def _closest(fragment: str):
+        fragment = fragment.strip()
+        if len(fragment) < 3:
+            return None
+        row = conn.execute(
+            "SELECT name FROM cards WHERE name LIKE ? COLLATE NOCASE "
+            "ORDER BY (edhrec_rank IS NULL), edhrec_rank LIMIT 1",
+            (f"%{fragment}%",),
+        ).fetchone()
+        if row and row["name"].lower() != name.lower():
+            return row["name"]
+        return None
+
+    token = name.split("//")[0].split(",")[0].strip()
+    suggestion = _closest(token) or _closest(token.split()[0] if token.split() else "")
+    if suggestion:
+        reason = "closest match in your database (possible typo or naming variant)"
+    elif " // " in name or "/" in name:
+        reason = "multi-face name not found under either face — may be a data gap"
+    else:
+        reason = "not in the card database — try `weaver update`, or check the spelling"
+    return {"name": name, "reason": reason, "suggestion": suggestion}
+
+
 def load_deck(conn: sqlite3.Connection, text: str) -> DeckView:
     entries = parse_decklist(text)
     cards: list[DeckCard] = []
     unresolved: list[str] = []
+    unresolved_detail: list[dict] = []
     for entry in entries:
         row = _resolve_row(conn, entry.name)
         if row is None:
             unresolved.append(entry.name)
+            unresolved_detail.append(_diagnose_unresolved(conn, entry.name))
             cards.append(DeckCard(entry.quantity, entry.name, entry.is_commander, None))
             continue
 
@@ -95,7 +127,7 @@ def load_deck(conn: sqlite3.Connection, text: str) -> DeckView:
                 on_arena=_row_on_arena(row),
             )
         )
-    deck = DeckView(cards=cards, unresolved=unresolved)
+    deck = DeckView(cards=cards, unresolved=unresolved, unresolved_detail=unresolved_detail)
 
     # Attach combo detection when the mirror is populated. Non-fatal: a deck
     # still analyzes fine if the combos tables are empty.
