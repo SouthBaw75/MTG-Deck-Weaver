@@ -23,9 +23,14 @@ def pages(fixtures_dir):
     return page1, page2
 
 
+def _no_bulk(*_a, **_k):
+    raise RuntimeError("bulk download disabled in this test")
+
+
 @pytest.fixture()
 def fake_api(monkeypatch, pages):
-    """Serve page1 then page2 (cycling, so re-runs work); record request URLs."""
+    """Serve page1 then page2 (cycling, so re-runs work); record request URLs.
+    Bulk download is disabled so the API-pagination fallback is exercised."""
     page1, page2 = pages
     calls = []
 
@@ -37,6 +42,8 @@ def fake_api(monkeypatch, pages):
         return page2
 
     monkeypatch.setattr(spellbook, "http_get_json", fake_get)
+    monkeypatch.setattr(spellbook, "download_file", _no_bulk)  # force API path
+    monkeypatch.setattr(spellbook, "PAGE_PAUSE", 0)
     return calls
 
 
@@ -146,3 +153,39 @@ def test_meta_recorded(db, ingested):
     assert get_meta(db, "spellbook.count") == "4"
     updated_at = get_meta(db, "spellbook.updated_at")
     assert updated_at and updated_at.endswith("Z")
+
+
+def test_bulk_path_loads_from_a_single_file(db, cache_dir, monkeypatch, pages):
+    """When the bulk file is available, it's used instead of paging the API."""
+    page1, page2 = pages
+    variants = (page1["results"] or []) + (page2["results"] or [])
+
+    def fake_download(url, dest, *, force=False, progress=print):
+        # write the variants as a top-level JSON array (bulk-file shape)
+        dest.write_text(json.dumps(variants), encoding="utf-8")
+        return dest
+
+    def boom(*_a, **_k):
+        raise AssertionError("API must not be called when bulk data is present")
+
+    monkeypatch.setattr(spellbook, "download_file", fake_download)
+    monkeypatch.setattr(spellbook, "http_get_json", boom)
+    monkeypatch.setattr(spellbook, "_MIN_BULK_OK", 1)  # tiny fixture
+
+    result = spellbook.ingest(db, cache_dir, progress=lambda _m: None)
+    assert "bulk" in result.detail
+    assert result.rows == 4  # same 4 OK variants, one 'E' skipped
+    assert db.execute("SELECT COUNT(*) FROM combos").fetchone()[0] == 4
+
+
+def test_failed_refresh_preserves_existing_combos(db, cache_dir, monkeypatch):
+    """If both bulk and API fail, don't wipe an existing combo table."""
+    db.execute("INSERT INTO combos(id, description) VALUES('old-1','kept')")
+    db.commit()
+    monkeypatch.setattr(spellbook, "download_file", _no_bulk)
+    monkeypatch.setattr(spellbook, "http_get_json", _no_bulk)
+    monkeypatch.setattr(spellbook, "PAGE_PAUSE", 0)
+    result = spellbook.ingest(db, cache_dir, progress=lambda _m: None)
+    assert result.rows == 0
+    # existing data survived the failed refresh
+    assert db.execute("SELECT COUNT(*) FROM combos").fetchone()[0] == 1

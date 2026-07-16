@@ -81,6 +81,11 @@ def kb_path(tmp_path, monkeypatch):
         return json.loads((FIXTURES / f"spellbook_variants_{page}.json").read_text())
 
     monkeypatch.setattr(spellbook, "http_get_json", fake_spellbook_get)
+    # Disable the bulk download so this test stays hermetic (uses the API path).
+    def _no_bulk(*_a, **_k):
+        raise RuntimeError("bulk disabled in test")
+    monkeypatch.setattr(spellbook, "download_file", _no_bulk)
+    monkeypatch.setattr(spellbook, "PAGE_PAUSE", 0)
 
     # Curated: read the real repo files regardless of cwd.
     monkeypatch.setenv("WEAVER_HOME", str(REPO_ROOT))
