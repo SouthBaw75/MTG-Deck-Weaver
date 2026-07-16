@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from weaver.knowledge.cardview import CardView
+from weaver.knowledge.cardview import CardView, export_card_name
 
 
 @dataclass
@@ -38,6 +38,7 @@ class Candidate:
     edhrec_rank: int | None
     is_game_changer: bool
     legal_commander: str | None
+    layout: str = ""  # Scryfall layout; drives Arena-safe export names
 
     # filled by the scorer
     score: float = 0.0
@@ -86,13 +87,21 @@ class BuildResult:
         return base + nonland + land
 
     def to_decklist(self) -> str:
-        """Emit a plain-text decklist (the universal import/export format)."""
-        lines = ["Commander", f"1 {self.commander.name}"]
+        """Emit a plain-text decklist (the universal import/export format).
+
+        Multi-face cards use Arena-safe names (front face for DFC/transform/
+        adventure; full name for split/aftermath), so the list imports cleanly
+        into MTG Arena as well as paper/Commander tools.
+        """
+        def nm(c) -> str:
+            return export_card_name(c.name, getattr(c, "layout", ""))
+
+        lines = ["Commander", f"1 {nm(self.commander)}"]
         if self.partner:
-            lines.append(f"1 {self.partner.name}")
+            lines.append(f"1 {nm(self.partner)}")
         lines.append("Deck")
         for a in self.assignments:
-            lines.append(f"{a.quantity} {a.candidate.name}")
+            lines.append(f"{a.quantity} {nm(a.candidate)}")
         for a in self.lands:
-            lines.append(f"{a.quantity} {a.candidate.name}")
+            lines.append(f"{a.quantity} {nm(a.candidate)}")
         return "\n".join(lines)

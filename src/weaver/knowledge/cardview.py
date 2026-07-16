@@ -21,6 +21,28 @@ _SPLIT_TYPES = re.compile(r"\s*//\s*")
 # Supertypes per CR 205.4a (lowercase).
 SUPERTYPES = {"basic", "legendary", "ongoing", "snow", "world"}
 
+# Multi-face layouts whose decklist entry uses the WHOLE "Front // Back" name —
+# both halves are a single castable object. Every other multi-face layout
+# (transform, modal_dfc, meld, adventure, flip, …) is referenced by its FRONT
+# face, which is what MTG Arena's importer requires; pasting the combined name
+# yields "unknown card title".
+_FULL_NAME_LAYOUTS = {"split", "aftermath"}
+
+
+def export_card_name(name: str, layout: str | None = None) -> str:
+    """The card name to write into an exported/importable decklist.
+
+    Scryfall stores multi-face cards under the combined ``Front // Back`` name,
+    but MTG Arena (and most import tools) key transforming/modal/adventure cards
+    by their front face only. Return the front face for those, and the full name
+    for split/aftermath cards (and for any single-face card, unchanged).
+    """
+    if " // " not in name:
+        return name
+    if (layout or "").lower() in _FULL_NAME_LAYOUTS:
+        return name
+    return name.split(" // ", 1)[0].strip()
+
 
 @dataclass(frozen=True)
 class TagHit:

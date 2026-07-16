@@ -31,6 +31,7 @@ def _row_to_candidate(row) -> Candidate:
         edhrec_rank=row["edhrec_rank"],
         is_game_changer=bool(row["is_game_changer"]),
         legal_commander=row["legal_commander"],
+        layout=row["layout"] or "",
     )
 
 
