@@ -102,19 +102,33 @@ def create_app(db_path: str | None = None, decks_db_path: str | None = None) -> 
         except Exception:
             return []
 
-    @app.get("/api/card/{name}")
-    def card(name: str):
+    def _lookup_card(name: str):
+        from weaver.analysis.loader import _resolve_row
+
         conn = db()
         _require_cards(conn)
-        row = conn.execute("SELECT * FROM cards WHERE name = ? COLLATE NOCASE", (name,)).fetchone()
+        # Robust name match: exact, then DFC/split faces in either direction
+        # (so a combined "A // B" name still resolves), then a fuzzy substring.
+        row = _resolve_row(conn, name)
         if row is None:
             row = conn.execute(
-                "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE ORDER BY edhrec_rank LIMIT 1",
+                "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE "
+                "ORDER BY (edhrec_rank IS NULL), edhrec_rank LIMIT 1",
                 (f"%{name}%",),
             ).fetchone()
         if row is None:
             raise HTTPException(404, f"No card matching {name!r}")
         return card_to_dict(conn, row)
+
+    # Query-param form is the primary one: card names can contain "//" (DFC/split)
+    # and other characters that break a path segment even when URL-encoded.
+    @app.get("/api/card")
+    def card_by_query(name: str):
+        return _lookup_card(name)
+
+    @app.get("/api/card/{name}")
+    def card(name: str):
+        return _lookup_card(name)
 
     @app.get("/api/search")
     def search(q: str, limit: int = 15, kind: str = "any"):

@@ -24,26 +24,41 @@ def _row_on_arena(row) -> bool:
 
 
 def _resolve_row(conn: sqlite3.Connection, name: str):
-    """Find a cards row by name, tolerant of DFC/split half-names."""
+    """Find a cards row by name, tolerant of DFC/split names in either direction:
+    a half-name ("Fire" -> "Fire // Ice"), or a full combined name whose card the
+    DB stores under a single face ("Bilbo, Luckwearer // Burglar's Plot" ->
+    "Bilbo, Luckwearer")."""
     row = conn.execute(
         "SELECT * FROM cards WHERE name = ? COLLATE NOCASE", (name,)
     ).fetchone()
     if row:
         return row
-    # A half-name of a multi-face card ("Fire" -> "Fire // Ice").
-    row = conn.execute(
-        "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE "
-        "AND name LIKE '% // %' ORDER BY length(name) LIMIT 1",
-        (f"{name} // %",),
-    ).fetchone()
-    if row:
-        return row
-    row = conn.execute(
-        "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE "
-        "AND name LIKE '% // %' ORDER BY length(name) LIMIT 1",
-        (f"% // {name}",),
-    ).fetchone()
-    return row
+
+    def _by_half(half: str):
+        r = conn.execute(
+            "SELECT * FROM cards WHERE name = ? COLLATE NOCASE", (half,)
+        ).fetchone()
+        if r:
+            return r
+        r = conn.execute(
+            "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE "
+            "AND name LIKE '% // %' ORDER BY length(name) LIMIT 1",
+            (f"{half} // %",),
+        ).fetchone()
+        if r:
+            return r
+        return conn.execute(
+            "SELECT * FROM cards WHERE name LIKE ? COLLATE NOCASE "
+            "AND name LIKE '% // %' ORDER BY length(name) LIMIT 1",
+            (f"% // {half}",),
+        ).fetchone()
+
+    # A combined "A // B" name: try each face. Also covers a bare half-name.
+    for face in (name.split(" // ") if " // " in name else [name]):
+        row = _by_half(face.strip())
+        if row:
+            return row
+    return None
 
 
 def load_deck(conn: sqlite3.Connection, text: str) -> DeckView:

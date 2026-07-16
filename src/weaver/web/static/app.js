@@ -149,7 +149,7 @@ async function openCardModal(name) {
   document.body.classList.add("modal-open");
   closeBtn.focus();
   try {
-    const card = await api(`/api/card/${encodeURIComponent(name)}`);
+    const card = await api(`/api/card?name=${encodeURIComponent(name)}`);
     body.innerHTML = "";
     body.append(renderCard(card));
     // If this card is part of the deck we're actively editing, offer to swap it
@@ -430,7 +430,7 @@ function initCard() {
     out.innerHTML = "";
     out.append(loadingNode("Consulting the archive…"));
     try {
-      const card = await api(`/api/card/${encodeURIComponent(name)}`);
+      const card = await api(`/api/card?name=${encodeURIComponent(name)}`);
       out.innerHTML = "";
       out.append(renderCard(card));
     } catch (err) {
