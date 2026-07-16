@@ -64,11 +64,50 @@ def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
     )
 
 
-def http_get_json(url: str, *, params: dict | None = None) -> dict:
-    """GET a JSON document with standard headers and timeout."""
-    resp = requests.get(url, params=params, headers=DEFAULT_HEADERS, timeout=REQUEST_TIMEOUT)
-    resp.raise_for_status()
-    return resp.json()
+MAX_RETRIES = 6
+_MAX_BACKOFF = 60.0  # seconds
+
+
+def http_get_json(
+    url: str,
+    *,
+    params: dict | None = None,
+    retries: int = MAX_RETRIES,
+    backoff: float = 2.0,
+) -> dict:
+    """GET a JSON document, retrying politely on rate limits and transient errors.
+
+    On HTTP 429 (Too Many Requests) or 5xx, waits and retries with exponential
+    back-off, honoring a ``Retry-After`` header when the server sends one. This
+    keeps paginated crawls (e.g. Commander Spellbook) from dying on a single
+    rate-limit response after many successful pages.
+    """
+    last_exc: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            resp = requests.get(url, params=params, headers=DEFAULT_HEADERS, timeout=REQUEST_TIMEOUT)
+        except requests.RequestException as exc:  # transient network error
+            last_exc = exc
+            if attempt == retries:
+                raise
+            _sleep(min(backoff ** attempt, _MAX_BACKOFF))
+            continue
+        if resp.status_code == 429 or 500 <= resp.status_code < 600:
+            if attempt == retries:
+                resp.raise_for_status()
+            retry_after = resp.headers.get("Retry-After")
+            wait = float(retry_after) if (retry_after and retry_after.isdigit()) else backoff ** attempt
+            _sleep(min(wait, _MAX_BACKOFF))
+            continue
+        resp.raise_for_status()
+        return resp.json()
+    # Exhausted retries on network errors.
+    raise last_exc if last_exc else RuntimeError(f"failed to GET {url}")
+
+
+def _sleep(seconds: float) -> None:
+    import time
+    time.sleep(seconds)
 
 
 def download_file(

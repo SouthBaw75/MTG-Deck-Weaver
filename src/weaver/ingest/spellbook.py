@@ -59,6 +59,15 @@ _SHAPE_WARNING = (
 
 _IDENTITY_LETTERS = ("W", "U", "B", "R", "G", "C")
 
+# Polite pause between page requests (seconds). Tests monkeypatch http_get_json,
+# but this keeps the real crawl under Commander Spellbook's rate limit.
+PAGE_PAUSE = 0.2
+
+
+def _pace() -> None:
+    import time
+    time.sleep(PAGE_PAUSE)
+
 
 def _normalize_identity(identity) -> list[str]:
     """Normalize the API's `identity` into a JSON-ready list of single letters.
@@ -121,6 +130,8 @@ def ingest(
     total_pages = "?"
     while url:
         page += 1
+        if page > 1:
+            _pace()  # polite delay between pages to avoid rate limits
         data = http_get_json(url)
         if page == 1 and isinstance(data.get("count"), int):
             total_pages = str(max(1, math.ceil(data["count"] / PAGE_LIMIT)))
