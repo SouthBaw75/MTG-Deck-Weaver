@@ -9,6 +9,20 @@ from weaver.analysis.deck import DeckCard, DeckView, parse_decklist
 from weaver.knowledge.cardview import CardView
 
 
+def _row_on_arena(row) -> bool:
+    """Whether a resolved card is available on MTG Arena (per Scryfall `games`)."""
+    try:
+        raw = row["games"]
+    except (IndexError, KeyError):
+        return False
+    if not raw:
+        return False
+    try:
+        return "arena" in json.loads(raw)
+    except (ValueError, TypeError):
+        return False
+
+
 def _resolve_row(conn: sqlite3.Connection, name: str):
     """Find a cards row by name, tolerant of DFC/split half-names."""
     row = conn.execute(
@@ -63,6 +77,7 @@ def load_deck(conn: sqlite3.Connection, text: str) -> DeckView:
                 legal_commander=row["legal_commander"],
                 is_game_changer=bool(row["is_game_changer"]),
                 price_usd=row["price_usd"],
+                on_arena=_row_on_arena(row),
             )
         )
     deck = DeckView(cards=cards, unresolved=unresolved)

@@ -107,6 +107,7 @@ class DeckCard:
     legal_commander: str | None = None
     is_game_changer: bool = False
     price_usd: float | None = None
+    on_arena: bool | None = None  # None = unresolved/unknown; set by the loader
 
     @property
     def resolved(self) -> bool:

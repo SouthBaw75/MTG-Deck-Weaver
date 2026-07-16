@@ -8,12 +8,54 @@ still runs with a neutral (goodstuff) bias.
 from __future__ import annotations
 
 import sqlite3
+from dataclasses import replace
 
 from weaver.build.assembler import assemble
-from weaver.build.pool import build_pool
+from weaver.build.pool import build_pool, commander_color_identity
 from weaver.build.scoring import score_pool
 from weaver.build.templates import template_for_bracket
 from weaver.build.types import BuildRequest, BuildResult
+
+# At/above this bracket the builder proactively completes the best combos it can
+# (the deck is meant to be high-power), instead of only flagging them later.
+_COMBO_BRACKET = 4
+_COMBO_ADDS = {4: 3, 5: 6}  # how many combos to auto-complete per bracket
+
+
+def _combo_completions(conn, result, pool, request, max_add):
+    """Names of missing combo pieces the assembled deck is one card away from,
+    limited to cards that are actual pool candidates (already color/Arena/budget
+    legal). Best (most-owned, most-popular) combos first."""
+    from weaver.analysis.combos import load_combo_index, match_combos
+
+    by_name = {c.name.lower(): c for c in pool}
+    deck_names = {result.commander.name}
+    if result.partner:
+        deck_names.add(result.partner.name)
+    deck_names.update(a.candidate.name for a in result.assignments)
+    deck_names.update(a.candidate.name for a in result.lands)
+
+    ci = commander_color_identity(result.commander, result.partner)
+    combos = load_combo_index(conn, deck_names)
+    _present, near = match_combos(deck_names, combos, deck_color_identity=ci or None)
+
+    picks: list[str] = []
+    seen: set[str] = set()
+    for m in near:
+        if len(picks) >= max_add:
+            break
+        missing = m.missing[0] if m.missing else None
+        if not missing:
+            continue
+        key = missing.lower()
+        cand = by_name.get(key)
+        # Only add a piece we could legally run: it must be a pool candidate
+        # (so it's on-color, within budget, and Arena-legal when arena_only).
+        if cand is None or key in seen or cand.name in deck_names:
+            continue
+        picks.append(cand.name)
+        seen.add(key)
+    return picks
 
 
 def _archetype_bias(commander, request: BuildRequest) -> tuple[list[str], dict[str, float]]:
@@ -69,6 +111,17 @@ def build_deck(conn: sqlite3.Connection, request: BuildRequest) -> BuildResult:
     score_pool(pool, request, bias, profile)
     template = template_for_bracket(request.bracket)
     result = assemble(commander, partner, pool, request, template)
+
+    # High-power brackets: proactively complete the best combos the deck is one
+    # card away from, by re-assembling with those pieces forced in as includes.
+    combo_added: list[str] = []
+    if request.bracket >= _COMBO_BRACKET:
+        max_add = _COMBO_ADDS.get(request.bracket, 3)
+        combo_added = _combo_completions(conn, result, pool, request, max_add)
+        if combo_added:
+            req2 = replace(request, seed_cards=[*request.seed_cards, *combo_added])
+            result = assemble(commander, partner, pool, req2, template)
+
     if archetype_keys:
         result.notes.insert(0, "archetype(s): " + ", ".join(archetype_keys))
     else:
@@ -85,5 +138,11 @@ def build_deck(conn: sqlite3.Connection, request: BuildRequest) -> BuildResult:
                 f"Heads up: {commander.name} isn't on MTG Arena, so this deck can't be "
                 "imported into Arena Brawl even though the other cards are Arena-legal.",
             )
+    if combo_added:
+        result.notes.insert(
+            0,
+            f"auto-completed {len(combo_added)} combo(s) for bracket {request.bracket}: "
+            + ", ".join(combo_added),
+        )
     result.notes.append(f"pool size after color/legality/budget filter: {len(pool)}")
     return result

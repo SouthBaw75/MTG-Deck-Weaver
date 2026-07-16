@@ -512,6 +512,10 @@ select.input { cursor: pointer; }
 }
 .combo-add__btn--illegal strong { color: #f19a9a; }
 .cut-chooser__warn { margin: 0 0 .6rem; font-size: .85rem; }
+.off-arena-banner {
+  border-color: color-mix(in srgb, #f19a9a 50%, var(--border));
+  background: color-mix(in srgb, #f19a9a 12%, transparent);
+}
 
 /* Cut chooser modal: pick a card to remove when accepting an upgrade. */
 .cut-modal { max-width: 34rem; }

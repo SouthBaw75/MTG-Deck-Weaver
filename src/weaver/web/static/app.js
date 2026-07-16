@@ -501,9 +501,9 @@ function initAnalyze() {
 
   // Remember the Arena preference across visits.
   if (arena) {
-    arena.checked = localStorage.getItem("weaver.analyze.arena") === "1";
+    arena.checked = localStorage.getItem("weaver.arena") === "1";
     arena.addEventListener("change", () => {
-      localStorage.setItem("weaver.analyze.arena", arena.checked ? "1" : "0");
+      localStorage.setItem("weaver.arena", arena.checked ? "1" : "0");
       // Re-render the current analysis so combo badges appear/disappear.
       if (input.value.trim() && out.querySelector(".analysis")) form.requestSubmit();
     });
@@ -555,6 +555,16 @@ function renderAnalysis(a, editable = false, ctx = null, arena = false) {
     const banner = el("div", { class: "banner banner--empty", style: "margin-top:.8rem" },
       [document.createTextNode(`Unresolved (${a.unresolved.length}): `)]);
     a.unresolved.forEach((n, i) => {
+      if (i) banner.append(document.createTextNode(", "));
+      banner.append(cardLink(n));
+    });
+    head.append(banner);
+  }
+  // Arena legality of the deck itself (only when the deck is flagged as Arena).
+  if (arena && a.off_arena && a.off_arena.length) {
+    const banner = el("div", { class: "banner off-arena-banner", style: "margin-top:.8rem" },
+      [document.createTextNode(`⚠ ${a.off_arena.length} card(s) not on MTG Arena — this deck won't import into Brawl: `)]);
+    a.off_arena.forEach((n, i) => {
       if (i) banner.append(document.createTextNode(", "));
       banner.append(cardLink(n));
     });
@@ -979,6 +989,15 @@ async function initBuild() {
 
   if (form.dataset.ready) return;
   form.dataset.ready = "1";
+
+  // Remember the Arena preference (shared with Analyze) so it doesn't silently
+  // reset to off between visits — a build that looks Arena-legal must be.
+  const arenaBox = $("#build-arena");
+  if (arenaBox) {
+    arenaBox.checked = localStorage.getItem("weaver.arena") === "1";
+    arenaBox.addEventListener("change", () =>
+      localStorage.setItem("weaver.arena", arenaBox.checked ? "1" : "0"));
+  }
 
   // Commander autocomplete — restricted to commander-eligible cards (legendary
   // creatures or "can be your commander"), not the whole card pool.

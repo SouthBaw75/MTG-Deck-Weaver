@@ -55,6 +55,20 @@ RAMP_PER_LAND = 3          # every 3 ramp pieces beyond baseline shaves 1 land
 _MAX_RAMP_REDUCTION = 4
 _LAND_FLOOR, _LAND_CEIL = 33, 42
 
+
+def _ramp_reduction(ramp_count: int) -> int:
+    """Lands shaved for a fat ramp package (every RAMP_PER_LAND beyond baseline)."""
+    return min(_MAX_RAMP_REDUCTION, max(0, ramp_count - RAMP_BASELINE) // RAMP_PER_LAND)
+
+
+def recommend_land_count(avg_mv: float, ramp_count: int) -> int:
+    """The recommended land count for a 100-card singleton deck, given its
+    average nonland mana value and ramp-piece count. Shared by the Mana Base
+    analyzer and the deck builder so they never disagree. Clamped to 33-42."""
+    base = _LAND_BASE_CONST + _LAND_MV_COEFF * avg_mv
+    recommended = int(round(base)) - _ramp_reduction(ramp_count)
+    return max(_LAND_FLOOR, min(_LAND_CEIL, recommended))
+
 # top-heavy: this many 5+ MV spells with a thin ramp package is a warning.
 _TOP_HEAVY_5PLUS = 10
 _TOP_HEAVY_RAMP = 8
@@ -128,13 +142,9 @@ def analyze(deck) -> AnalysisSection:
     )
 
     # ---- recommended land count -------------------------------------------
+    recommended = recommend_land_count(avg_mv, ramp_count)
+    ramp_reduction = _ramp_reduction(ramp_count)
     base = _LAND_BASE_CONST + _LAND_MV_COEFF * avg_mv
-    ramp_reduction = min(
-        _MAX_RAMP_REDUCTION,
-        max(0, ramp_count - RAMP_BASELINE) // RAMP_PER_LAND,
-    )
-    recommended = int(round(base)) - ramp_reduction
-    recommended = max(_LAND_FLOOR, min(_LAND_CEIL, recommended))
     land_low, land_high = recommended - 1, recommended + 1
 
     # ---- color sources vs. pip demand -------------------------------------

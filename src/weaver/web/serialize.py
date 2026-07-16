@@ -36,11 +36,15 @@ def section_to_dict(section: AnalysisSection) -> dict:
 
 
 def analysis_to_dict(deck, sections: list[AnalysisSection]) -> dict:
+    # Resolved cards that aren't on MTG Arena — surfaced so an Arena deck can be
+    # warned about cards that will fail to import into Brawl.
+    off_arena = sorted({c.name for c in deck.cards if c.on_arena is False})
     return {
         "commanders": [c.name for c in deck.commanders],
         "total_cards": deck.total_cards,
         "land_count": deck.land_count,
         "unresolved": list(deck.unresolved),
+        "off_arena": off_arena,
         "sections": [section_to_dict(s) for s in sections],
     }
 

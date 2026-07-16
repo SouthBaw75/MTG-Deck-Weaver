@@ -21,11 +21,52 @@ import json
 import re
 from pathlib import Path
 
+from weaver.analysis.analyzers.manabase import RAMP_TAGS, recommend_land_count
 from weaver.build.types import BuildRequest, BuildResult, Candidate, SlotAssignment
 from weaver.db.connection import repo_root
 
 _PIP = re.compile(r"\{([^}]+)\}")
 _COLORS = ("W", "U", "B", "R", "G")
+
+
+def _mv_and_ramp(assignments: list[SlotAssignment]) -> tuple[float, int]:
+    """Average nonland mana value and ramp-piece count of the chosen spells —
+    the inputs the shared land-count formula needs."""
+    n = len(assignments) or 1
+    total_mv = sum(a.candidate.mana_value for a in assignments)
+    avg_mv = round(total_mv / n, 2)
+    ramp = sum(1 for a in assignments if any(t in a.candidate.tags for t in RAMP_TAGS))
+    return avg_mv, ramp
+
+
+def _resize_nonlands(
+    assignments: list[SlotAssignment],
+    nonland_pool: list[Candidate],
+    picker: "_Picker",
+    target: int,
+) -> None:
+    """Trim or extend the nonland picks to exactly `target`, so nonlands + lands
+    stay at 99. Drops the lowest-value synergy/goodstuff picks first (never seed),
+    and extends from the best remaining candidates."""
+    if len(assignments) > target:
+        drop = len(assignments) - target
+        removable = sorted(
+            (a for a in assignments if a.role != "seed"),
+            key=lambda a: (0 if a.role == "synergy" else 1, a.score),
+        )[:drop]
+        remove_ids = {id(a) for a in removable}
+        for a in removable:
+            picker.release(a.candidate)
+        assignments[:] = [a for a in assignments if id(a) not in remove_ids]
+    else:
+        for cand in nonland_pool:
+            if len(assignments) >= target:
+                break
+            if not picker.can_take(cand):
+                continue
+            picker.take(cand)
+            reason = cand.reasons[0] if cand.reasons else "synergy/goodstuff"
+            assignments.append(SlotAssignment(cand, "synergy", cand.score, reason))
 
 # Game Changers allowed by bracket (mirrors data/curated/brackets.json).
 _GC_LIMIT = {1: 0, 2: 0, 3: 3, 4: None, 5: None}
@@ -82,6 +123,14 @@ class _Picker:
         if cand.price_usd:
             self.spent += cand.price_usd
 
+    def release(self, cand: Candidate) -> None:
+        """Undo take(): free a slot (used when rebalancing lands/combos)."""
+        self.chosen.discard(cand.name)
+        if cand.is_game_changer:
+            self.gc_count = max(0, self.gc_count - 1)
+        if cand.price_usd:
+            self.spent = max(0.0, self.spent - cand.price_usd)
+
 
 def assemble(
     commander: Candidate,
@@ -94,7 +143,6 @@ def assemble(
     gc_limit = _GC_LIMIT.get(request.bracket)
     picker = _Picker(request, gc_limit)
 
-    land_count = request.land_count if request.land_count is not None else template["land_count"]
     role_quotas: dict[str, int] = dict(template["roles"])
     flex = template.get("synergy_flex", 0)
 
@@ -143,6 +191,17 @@ def assemble(
         reason = cand.reasons[0] if cand.reasons else "synergy/goodstuff"
         assignments.append(SlotAssignment(cand, "synergy", cand.score, reason))
         filled_flex += 1
+
+    # --- size the mana base to the deck's real curve + ramp ----------------
+    # Static templates under-land high-curve decks; recompute the land count
+    # from the chosen spells with the same formula the Mana Base analyzer uses,
+    # then rebalance the nonland slots so the deck stays at 100.
+    if request.land_count is not None:
+        land_count = request.land_count
+    else:
+        avg_mv, ramp_count = _mv_and_ramp(assignments)
+        land_count = recommend_land_count(avg_mv, ramp_count)
+    _resize_nonlands(assignments, nonlands, picker, target=99 - land_count)
 
     # --- mana base ----------------------------------------------------------
     land_assignments = _build_manabase(commander, partner, assignments, lands, land_count, picker)
